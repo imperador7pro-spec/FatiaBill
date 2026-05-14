@@ -483,7 +483,15 @@ export default function App() {
           <TaxReport theme={theme} companyName={profile?.company_name || 'Mon Entreprise'} expenses={expenses} finance={finance} />
         )}
 
-        {mode === 'pro' && view === 'academy_pro' && <GuidePro theme={theme} />}
+        {mode === 'pro' && view === 'academy_pro' && (
+          <GuidePro
+            theme={theme}
+            completedLessons={completedLessons}
+            xp={xp}
+            isPremium={isPremium}
+            onOpenLesson={openLesson}
+          />
+        )}
 
         {view === 'setup' && <Setup theme={theme} expenses={expenses} setExpenses={setExpenses} />}
       </main>
