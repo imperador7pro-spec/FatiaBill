@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Zap, Landmark, Flame, Crown, Sun, Moon, LogOut, Sparkles, AlertCircle,
   CheckSquare, Target, GraduationCap, MessageCircle, Settings,
-  LayoutDashboard, Receipt, Camera, FileSignature, BookOpen,
+  LayoutDashboard, Receipt, Camera, FileSignature, FileText, BookOpen,
 } from 'lucide-react';
 
 export function TopNav({ theme, mode, xp, streak, effPlan, trialLeft, trialExpired, onUpgrade, onToggleDark, onSignOut }) {
@@ -101,8 +101,9 @@ const NAV_PRIVATE = [
 const NAV_PRO = [
   { key: 'pro_dashboard', icon: LayoutDashboard },
   { key: 'transactions', icon: Receipt },
+  { key: 'invoices', icon: FileSignature, special: true },
   { key: 'scanner', icon: Camera },
-  { key: 'tax_report', icon: FileSignature },
+  { key: 'tax_report', icon: FileText },
   { key: 'ai_pro', icon: MessageCircle, special: true },
   { key: 'academy_pro', icon: BookOpen },
   { key: 'setup', icon: Settings },
