@@ -122,6 +122,10 @@ export function OnboardingWizard({ theme, user, darkMode, onToggleDark, existing
     tva_registered: existingProfile?.tva_registered ?? false,
     tva_method: existingProfile?.tva_method || '',
     founded_year: existingProfile?.founded_year || '',
+    iban: existingProfile?.iban || '',
+    address_street: existingProfile?.address_street || '',
+    address_postal_code: existingProfile?.address_postal_code || '',
+    address_city: existingProfile?.address_city || '',
   });
 
   const totalSteps = 4;
@@ -191,6 +195,10 @@ export function OnboardingWizard({ theme, user, darkMode, onToggleDark, existing
           tva_registered: !!form.tva_registered,
           tva_method: form.tva_registered ? (form.tva_method || 'TDFN') : null,
           founded_year: parseInt(form.founded_year, 10) || null,
+          iban: form.iban.replace(/\s+/g, '').toUpperCase() || null,
+          address_street: form.address_street.trim() || null,
+          address_postal_code: form.address_postal_code.trim() || null,
+          address_city: form.address_city.trim() || null,
         });
       }
       await onComplete(payload);
@@ -550,6 +558,56 @@ function Step3Pro({ theme, form, update }) {
               />
             </div>
           )}
+        </div>
+
+        <div className={`pt-3 mt-3 border-t ${theme.bd}`}>
+          <p className={`text-[10px] font-black uppercase tracking-wider ${theme.mt} mb-2`}>
+            Coordonnées de facturation (pour QR-factures suisses)
+          </p>
+          <div className="space-y-3">
+            <div>
+              <Label>IBAN suisse</Label>
+              <TextInput
+                theme={theme}
+                value={form.iban}
+                onChange={(v) => update('iban', v.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                placeholder="CH93 0076 2011 6238 5295 7"
+                max={22}
+              />
+              <p className={`text-[9px] ${theme.mt} mt-1`}>Compte CHF où vos clients vous paieront via QR-bill.</p>
+            </div>
+            <div>
+              <Label>Adresse (rue + numéro)</Label>
+              <TextInput
+                theme={theme}
+                value={form.address_street}
+                onChange={(v) => update('address_street', v)}
+                placeholder="Rue du Lac 12"
+                max={100}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label>NPA</Label>
+                <TextInput
+                  theme={theme}
+                  value={form.address_postal_code}
+                  onChange={(v) => update('address_postal_code', v.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="1003"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Ville</Label>
+                <TextInput
+                  theme={theme}
+                  value={form.address_city}
+                  onChange={(v) => update('address_city', v)}
+                  placeholder="Lausanne"
+                  max={50}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

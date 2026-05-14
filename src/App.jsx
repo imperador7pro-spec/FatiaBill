@@ -21,6 +21,7 @@ import { AICoach } from './views/AICoach.jsx';
 import { ProDashboard } from './views/ProDashboard.jsx';
 import { Transactions } from './views/Transactions.jsx';
 import { Scanner } from './views/Scanner.jsx';
+import { Invoices } from './views/Invoices.jsx';
 import { TaxReport } from './views/TaxReport.jsx';
 import { GuidePro } from './views/GuidePro.jsx';
 import { Setup } from './views/Setup.jsx';
@@ -532,6 +533,16 @@ export default function App() {
             onAddTx={() => setModal('tx')}
             onToggleStatus={toggleTransactionStatus}
             onDeleteTx={deleteTransaction}
+          />
+        )}
+
+        {mode === 'pro' && view === 'invoices' && (
+          <Invoices
+            theme={theme}
+            profile={profile}
+            effPlan={effPlan}
+            isPremium={isPremium}
+            onUpgrade={() => setModal('upgrade')}
           />
         )}
 
