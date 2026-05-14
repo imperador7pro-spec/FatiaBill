@@ -50,6 +50,7 @@ export default function App() {
 
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
+  const [scanError, setScanError] = useState(null);
 
   const [completedLessons, setCompletedLessons] = useState([]);
   const [xp, setXp] = useState(0);
@@ -213,14 +214,44 @@ export default function App() {
     setAiInput('');
     setAiLoading(true);
     const totalExpenses = expenses.reduce((a, e) => a + (e.amount || 0), 0);
-    const ctx = mode === 'private'
-      ? `Salaire:${salary},Charges:${totalExpenses},Épargne:${finance.monthlyCapacity.toFixed(0)}`
-      : `CA:${finance.paidRevenue},Charges:${finance.fixedExpenses + finance.paidSuppliers}`;
+    const age = profile?.birth_year ? new Date().getFullYear() - profile.birth_year : null;
+    const ctxObj = {
+      mode,
+      canton: profile?.canton || null,
+      city: profile?.city || null,
+      age,
+      civil_status: profile?.civil_status || null,
+      num_children: profile?.num_children ?? 0,
+      nationality_status: profile?.nationality_status || null,
+    };
+    if (mode === 'private') {
+      Object.assign(ctxObj, {
+        employment_status: profile?.employment_status || null,
+        salary_monthly: salary || null,
+        fixed_expenses_monthly: totalExpenses || null,
+        monthly_capacity: finance.monthlyCapacity ?? null,
+        has_3a: profile?.has_3a ?? null,
+        has_lpp: profile?.has_lpp ?? null,
+        lamal_franchise: profile?.lamal_franchise ?? null,
+      });
+    } else {
+      Object.assign(ctxObj, {
+        business_form: profile?.business_form || null,
+        business_sector: profile?.business_sector || null,
+        company_name: profile?.company_name || null,
+        tva_registered: profile?.tva_registered ?? null,
+        tva_method: profile?.tva_method || null,
+        revenue_paid: finance.paidRevenue ?? null,
+        revenue_pending: finance.pendingRevenue ?? null,
+        fixed_expenses: finance.fixedExpenses ?? null,
+        paid_suppliers: finance.paidSuppliers ?? null,
+      });
+    }
     try {
       const r = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userText, context: ctx, mode }),
+        body: JSON.stringify({ message: userText, context: ctxObj, mode }),
       });
       const d = await r.json();
       setAiMessages((prev) => [...prev, { r: 'a', t: d.response || 'Erreur.' }]);
@@ -300,38 +331,74 @@ export default function App() {
 
   const deleteGoal = (idx) => setGoals(goals.filter((_, i) => i !== idx));
 
-  const runScan = () => {
+  const runScan = async (imageDataUrl) => {
+    if (!imageDataUrl) return;
+    const period = currentPeriod();
+    const usedThisPeriod = profile?.ai_messages_period === period
+      ? (profile?.ai_messages_used ?? 0)
+      : 0;
+    const aiLimit = getLimit(effPlan, 'ai');
+    if (usedThisPeriod >= aiLimit) {
+      setModal('upgrade');
+      return;
+    }
+    setScanError(null);
     setScanResult(null);
     setScanning(true);
-    setTimeout(() => {
-      setScanResult({
-        a: '127.50',
-        l: 'Restaurant Le Comptoir — Client',
-        d: new Date().toISOString().split('T')[0],
-        cat: 'Repas & Représentation',
+    try {
+      const r = await fetch('/api/ai/scan-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64: imageDataUrl, mime_type: 'image/jpeg' }),
       });
-      setScanning(false);
-    }, 2000);
+      const d = await r.json();
+      if (!r.ok || d.error) {
+        setScanError(d.error || 'Échec de l\'analyse');
+      } else {
+        setScanResult(d.extracted);
+        const nextUsed = usedThisPeriod + 1;
+        setProfile((prev) => prev && ({ ...prev, ai_messages_used: nextUsed, ai_messages_period: period }));
+        if (user) db.updateProfile(user.id, { ai_messages_used: nextUsed, ai_messages_period: period });
+      }
+    } catch (e) {
+      setScanError('Erreur de connexion au scanner');
+    }
+    setScanning(false);
   };
+
+  const editScanResult = (next) => setScanResult(next);
+  const clearScanError = () => { setScanError(null); setScanResult(null); };
 
   const classifyScan = (type) => {
     if (!scanResult) return;
-    setDocuments([{ id: Date.now().toString(), ...scanResult, type, date: scanResult.d }, ...documents]);
+    const today = new Date().toISOString().split('T')[0];
+    const doc = {
+      id: Date.now().toString(),
+      label: scanResult.label || scanResult.vendor || 'Document scanné',
+      amount: scanResult.amount || 0,
+      date: scanResult.date || today,
+      vendor: scanResult.vendor || null,
+      tva_amount: scanResult.tva_amount ?? null,
+      category: scanResult.category || null,
+      type,
+    };
+    setDocuments([doc, ...documents]);
     if (type !== 'JUSTIFICATIF') {
       setTransactions([
         {
           id: (Date.now() + 1).toString(),
           type: type === 'CLIENT' ? 'IN' : 'OUT',
-          amount: parseFloat(scanResult.a),
-          label: scanResult.l,
-          date: scanResult.d,
+          amount: doc.amount,
+          label: doc.label,
+          date: doc.date,
           status: 'PAID',
-          cat: type === 'FOURNISSEUR' ? scanResult.cat : null,
+          cat: type === 'FOURNISSEUR' ? doc.category : null,
         },
         ...transactions,
       ]);
     }
     setScanResult(null);
+    setScanError(null);
   };
 
   const openLesson = (lesson) => {
@@ -473,9 +540,12 @@ export default function App() {
             theme={theme}
             scanning={scanning}
             scanResult={scanResult}
+            scanError={scanError}
             documents={documents}
             onScan={runScan}
             onClassify={classifyScan}
+            onEditResult={editScanResult}
+            onClearError={clearScanError}
           />
         )}
 
