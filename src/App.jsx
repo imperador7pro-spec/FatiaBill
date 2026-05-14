@@ -23,6 +23,7 @@ import { Transactions } from './views/Transactions.jsx';
 import { Scanner } from './views/Scanner.jsx';
 import { Invoices } from './views/Invoices.jsx';
 import { TaxSimulator } from './views/TaxSimulator.jsx';
+import { SalaryBreakdown } from './views/SalaryBreakdown.jsx';
 import { TaxReport } from './views/TaxReport.jsx';
 import { GuidePro } from './views/GuidePro.jsx';
 import { Setup } from './views/Setup.jsx';
@@ -577,6 +578,10 @@ export default function App() {
 
         {view === 'tax_sim' && (
           <TaxSimulator theme={theme} profile={profile} mode={mode} />
+        )}
+
+        {view === 'salary_breakdown' && (
+          <SalaryBreakdown theme={theme} profile={profile} />
         )}
 
         {view === 'setup' && <Setup theme={theme} expenses={expenses} setExpenses={setExpenses} />}
