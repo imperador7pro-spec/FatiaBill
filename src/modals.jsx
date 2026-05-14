@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import {
   X, Target, CheckCircle2, Clock, HelpCircle, Check, Award, Crown,
+  Sparkles, AlertCircle,
 } from 'lucide-react';
 import { GOAL_PRESETS, EXPENSE_CATEGORIES, getIcon } from './data.js';
+import { PLAN_FEATURES } from './plan.js';
 
 export function ModalShell({ theme, modal, onClose, children }) {
   if (!modal) return null;
+  const wide = modal === 'upgrade';
   return (
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4"
@@ -14,7 +17,7 @@ export function ModalShell({ theme, modal, onClose, children }) {
       }}
     >
       <div
-        className={`w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden sm:rounded-3xl rounded-t-3xl shadow-2xl ${theme.cd} border ${theme.bd}`}
+        className={`w-full ${wide ? 'max-w-lg' : 'max-w-md'} max-h-[90vh] flex flex-col overflow-hidden sm:rounded-3xl rounded-t-3xl shadow-2xl ${theme.cd} border ${theme.bd}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -266,44 +269,97 @@ export function LessonModal({ theme, lesson, onClose, onComplete, onQuizCorrect 
   );
 }
 
-export function UpgradeModal({ theme, mode, onClose, onUpgrade }) {
-  const features = [
-    'Académie complète (16+ leçons quiz)',
-    'Coach IA illimité',
-    'Objectifs illimités',
-    'Projections investissement',
-    mode === 'pro' ? 'Scanner documents' : 'Export PDF',
-    mode === 'pro' ? 'Dossier fiscal' : 'Alertes intelligentes',
-  ];
+export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgrade }) {
+  const isPro = mode === 'pro';
+  const price = isPro ? '29.-' : '9.-';
+  const planLabel = isPro ? 'Pro' : 'Privé';
+  const isTrial = effPlan === 'trial';
+
+  const renderCell = (value) => {
+    if (value === true || value === 'pro') return <Check size={14} className="text-emerald-500 mx-auto" strokeWidth={3} />;
+    if (value === false) return <X size={14} className="text-stone-300 mx-auto" />;
+    return <span className="text-[10px] font-bold text-stone-700">{value}</span>;
+  };
+
+  const renderFreeCell = (value) => {
+    if (value === true) return <Check size={14} className="text-stone-400 mx-auto" />;
+    if (value === false) return <X size={14} className="text-stone-300 mx-auto" />;
+    if (value === 'pro') return <X size={14} className="text-stone-300 mx-auto" />;
+    return <span className="text-[10px] font-bold text-stone-500">{value}</span>;
+  };
 
   return (
     <>
-      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-5 text-center">
-        <Crown size={28} className="mx-auto mb-1" />
-        <h2 className="text-lg font-black">FatiaBill Premium</h2>
-        <p className="text-sm opacity-90">{mode === 'pro' ? '19.-' : '9.-'} CHF/mois</p>
-      </div>
-      <div className="p-4 space-y-3 overflow-y-auto">
-        {features.map((f, i) => (
-          <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-amber-50">
-            <CheckCircle2 size={16} className="text-amber-500 shrink-0" />
-            <span className="text-xs font-medium">{f}</span>
-          </div>
-        ))}
-        <div className={`p-3 rounded-xl ${theme.sf} text-center`}>
-          <p className="text-[10px] font-bold text-stone-500">Économie estimée</p>
-          <p className="font-black text-xl text-emerald-600">&gt; 2'100 CHF/an</p>
-          <p className="text-[9px] text-stone-500">en optimisation fiscale (3A)</p>
+      <div className={`relative p-5 text-white ${isPro ? 'bg-gradient-to-br from-indigo-600 to-purple-700' : 'bg-gradient-to-br from-emerald-600 to-teal-700'}`}>
+        <button onClick={onClose} className="absolute top-3 right-3 bg-white/15 p-1.5 rounded-full hover:bg-white/25 transition-colors">
+          <X size={14} />
+        </button>
+        <Crown size={26} className="mb-2" />
+        <h2 className="text-xl font-black tracking-tight">FatiaBill Premium {planLabel}</h2>
+        <div className="flex items-baseline gap-1.5 mt-1">
+          <span className="text-3xl font-black">{price}</span>
+          <span className="text-sm opacity-80">CHF / mois</span>
         </div>
+        {isTrial && trialLeft > 0 && (
+          <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 text-[10px] font-bold">
+            <Sparkles size={12} />
+            Essai en cours · {trialLeft} jour{trialLeft > 1 ? 's' : ''} restant{trialLeft > 1 ? 's' : ''}
+          </div>
+        )}
+        {effPlan === 'free' && (
+          <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 text-[10px] font-bold">
+            <AlertCircle size={12} />
+            Essai terminé — Premium pour tout débloquer
+          </div>
+        )}
+      </div>
+
+      <div className="overflow-y-auto flex-1">
+        <table className="w-full text-xs">
+          <thead className={`sticky top-0 ${theme.dk ? 'bg-zinc-900' : 'bg-white'} border-b ${theme.bd}`}>
+            <tr>
+              <th className="text-left p-3 font-black text-[10px] uppercase text-stone-400 tracking-wider">Ce que vous obtenez</th>
+              <th className="p-3 font-black text-[10px] uppercase text-stone-400 tracking-wider w-16">Gratuit</th>
+              <th className={`p-3 font-black text-[10px] uppercase tracking-wider w-20 ${isPro ? 'text-indigo-500' : 'text-emerald-500'}`}>
+                {planLabel}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {PLAN_FEATURES.map((section) => {
+              const showSection = !section.section.startsWith('Pro') || isPro;
+              if (!showSection) return null;
+              return (
+                <React.Fragment key={section.section}>
+                  <tr className={theme.dk ? 'bg-zinc-800/40' : 'bg-stone-50'}>
+                    <td colSpan={3} className={`p-2 px-3 text-[10px] font-black uppercase tracking-wider ${isPro ? 'text-indigo-500' : 'text-emerald-600'}`}>
+                      {section.section}
+                    </td>
+                  </tr>
+                  {section.rows.map((row, ri) => (
+                    <tr key={ri} className={`border-b ${theme.bd}`}>
+                      <td className={`p-2.5 px-3 ${theme.tx} text-[11px]`}>{row.label}</td>
+                      <td className="p-2.5 text-center">{renderFreeCell(row.free)}</td>
+                      <td className="p-2.5 text-center">{renderCell(isPro ? row.premium : (row.premium === 'pro' ? false : row.premium))}</td>
+                    </tr>
+                  ))}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className={`p-4 border-t ${theme.bd} space-y-2`}>
         <button
           onClick={() => { onUpgrade(); onClose(); }}
-          className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-xl text-base"
+          className={`w-full py-3.5 text-white font-black rounded-2xl text-sm shadow-lg transition-transform hover:scale-[1.02] ${isPro ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
         >
-          Activer Premium
+          Activer Premium {planLabel} · {price} CHF/mois
         </button>
-        <button onClick={onClose} className={`w-full py-2 text-sm font-bold ${theme.mt}`}>
-          Continuer gratuit
-        </button>
+        <p className={`text-[10px] text-center ${theme.mt}`}>
+          Annulable à tout moment · Pas d'engagement · Paiement sécurisé Stripe
+        </p>
       </div>
     </>
   );
