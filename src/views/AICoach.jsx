@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, Crown, MessageCircle, Sparkles, Send } from 'lucide-react';
+import { Lock, Crown, MessageCircle, Sparkles, Send, AlertCircle } from 'lucide-react';
 
 const SUGGESTIONS_PRIVATE = [
   'Ouvrir un 3ème pilier?',
@@ -15,30 +15,10 @@ const SUGGESTIONS_PRO = [
   'Stratégie pricing pour mon service?',
 ];
 
-export function AICoach({ theme, mode, isPremium, messages, input, loading, onInput, onSend, onUpgrade }) {
-  if (!isPremium) {
-    return (
-      <div className="max-w-2xl mx-auto space-y-4">
-        <div className={`text-center py-16 ${theme.mt}`}>
-          <Lock size={40} className="mx-auto mb-4 opacity-20" />
-          <h3 className={`font-black text-lg mb-2 ${theme.tx}`}>
-            {mode === 'pro' ? 'Coach Business IA' : 'Coach Financier IA'}
-          </h3>
-          <p className={`text-sm mb-6 max-w-sm mx-auto ${theme.mt}`}>
-            {mode === 'pro'
-              ? "Un conseiller IA spécialisé en création d'entreprise, TVA, AVS, optimisation fiscale et stratégie business en Suisse."
-              : 'Un conseiller IA expert en budget, épargne, 3ème pilier, investissement et fiscalité suisse.'}
-          </p>
-          <button
-            onClick={onUpgrade}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-xl flex items-center gap-2 mx-auto"
-          >
-            <Crown size={16} /> Débloquer avec Premium
-          </button>
-        </div>
-      </div>
-    );
-  }
+export function AICoach({ theme, mode, effPlan, aiUsed, aiLimit, messages, input, loading, onInput, onSend, onUpgrade }) {
+  const limitReached = Number.isFinite(aiLimit) && aiUsed >= aiLimit;
+  const remaining = Number.isFinite(aiLimit) ? Math.max(aiLimit - aiUsed, 0) : null;
+  const showQuotaBadge = effPlan === 'free';
 
   const suggestions = mode === 'pro' ? SUGGESTIONS_PRO : SUGGESTIONS_PRIVATE;
   const accent = mode === 'pro' ? 'indigo' : 'emerald';
@@ -55,6 +35,16 @@ export function AICoach({ theme, mode, isPremium, messages, input, loading, onIn
         <p className={`text-[10px] ${theme.mt}`}>
           {mode === 'pro' ? 'TVA · AVS · Stratégie · Entreprise' : 'Fiscalité · Épargne · Investissement'}
         </p>
+        {showQuotaBadge && !limitReached && (
+          <div className={`inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-lg text-[10px] font-bold ${theme.dk ? 'bg-zinc-800 text-zinc-300' : 'bg-stone-100 text-stone-600'}`}>
+            <Sparkles size={11} /> {remaining}/{aiLimit} message{aiLimit > 1 ? 's' : ''} restant{remaining > 1 ? 's' : ''} ce mois · gratuit
+          </div>
+        )}
+        {showQuotaBadge && limitReached && (
+          <button onClick={onUpgrade} className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+            <Crown size={11} /> Quota gratuit épuisé · passer Premium
+          </button>
+        )}
       </div>
       <div className={`rounded-2xl border ${theme.cd} ${theme.bd} overflow-hidden`} style={{ minHeight: '380px' }}>
         <div className="p-4 space-y-3 max-h-80 overflow-y-auto">

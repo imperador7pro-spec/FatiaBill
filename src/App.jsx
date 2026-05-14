@@ -4,8 +4,11 @@ import {
   DEFAULT_EXPENSES_PRIVATE,
   DEFAULT_EXPENSES_PRO,
   GOAL_PRESETS,
-  FREE_LIMITS,
 } from './data.js';
+import {
+  effectivePlan, trialDaysLeft, hasTrialExpired,
+  newTrialDates, getLimit, isPremiumLike, currentPeriod,
+} from './plan.js';
 import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
@@ -55,7 +58,6 @@ export default function App() {
   const [aiMessages, setAiMessages] = useState([]);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
-  const [aiCount, setAiCount] = useState(0);
 
   const [view, setView] = useState('dashboard');
   const [modal, setModal] = useState(null);
@@ -63,7 +65,10 @@ export default function App() {
   const [editingGoalIdx, setEditingGoalIdx] = useState(null);
   const [goalInitial, setGoalInitial] = useState(null);
 
-  const isPremium = plan === 'premium';
+  const effPlan = effectivePlan(profile);
+  const isPremium = isPremiumLike(effPlan);
+  const trialLeft = trialDaysLeft(profile);
+  const trialExpired = hasTrialExpired(profile);
   const expenses = mode === 'private' ? expensesPrivate : expensesPro;
   const setExpenses = mode === 'private' ? setExpensesPrivate : setExpensesPro;
   const theme = getTheme(darkMode, mode);
@@ -159,9 +164,18 @@ export default function App() {
 
   const handleOnboardingComplete = async (payload) => {
     if (!user) return;
-    await db.updateProfile(user.id, payload);
-    setProfile((prev) => ({ ...(prev || {}), ...payload }));
+    const wasAlreadyPremium = profile?.plan === 'premium';
+    const trialDates = (!wasAlreadyPremium && !profile?.trial_started_at)
+      ? newTrialDates()
+      : {};
+    const fullPayload = {
+      ...payload,
+      ...(wasAlreadyPremium ? {} : (profile?.trial_started_at ? {} : { plan: 'trial', ...trialDates })),
+    };
+    await db.updateProfile(user.id, fullPayload);
+    setProfile((prev) => ({ ...(prev || {}), ...fullPayload }));
     setMode(payload.mode);
+    if (!wasAlreadyPremium && !profile?.trial_started_at) setPlan('trial');
     setOnboardingDone(true);
     setView(payload.mode === 'pro' ? 'pro_dashboard' : 'dashboard');
     if (payload.mode === 'private') setTimeout(() => setModal('sal'), 400);
@@ -185,7 +199,12 @@ export default function App() {
 
   const sendAi = async () => {
     if (!aiInput.trim()) return;
-    if (!isPremium && aiCount >= FREE_LIMITS.ai) {
+    const period = currentPeriod();
+    const usedThisPeriod = profile?.ai_messages_period === period
+      ? (profile?.ai_messages_used ?? 0)
+      : 0;
+    const aiLimit = getLimit(effPlan, 'ai');
+    if (usedThisPeriod >= aiLimit) {
       setModal('upgrade');
       return;
     }
@@ -205,7 +224,11 @@ export default function App() {
       });
       const d = await r.json();
       setAiMessages((prev) => [...prev, { r: 'a', t: d.response || 'Erreur.' }]);
-      if (!isPremium) setAiCount((c) => c + 1);
+      const nextUsed = usedThisPeriod + 1;
+      setProfile((prev) => prev && ({ ...prev, ai_messages_used: nextUsed, ai_messages_period: period }));
+      if (user) {
+        db.updateProfile(user.id, { ai_messages_used: nextUsed, ai_messages_period: period });
+      }
     } catch {
       setAiMessages((prev) => [...prev, { r: 'a', t: 'Erreur de connexion.' }]);
     }
@@ -240,7 +263,7 @@ export default function App() {
   };
 
   const openAddGoal = () => {
-    if (!isPremium && goals.length >= FREE_LIMITS.goals) {
+    if (goals.length >= getLimit(effPlan, 'goals')) {
       setModal('upgrade');
       return;
     }
@@ -368,7 +391,9 @@ export default function App() {
         mode={mode}
         xp={xp}
         streak={streak}
-        isPremium={isPremium}
+        effPlan={effPlan}
+        trialLeft={trialLeft}
+        trialExpired={trialExpired}
         onUpgrade={() => setModal('upgrade')}
         onToggleDark={() => setDarkMode(!darkMode)}
         onSignOut={handleSignOut}
@@ -417,7 +442,9 @@ export default function App() {
           <AICoach
             theme={theme}
             mode={mode}
-            isPremium={isPremium}
+            effPlan={effPlan}
+            aiUsed={profile?.ai_messages_period === currentPeriod() ? (profile?.ai_messages_used ?? 0) : 0}
+            aiLimit={getLimit(effPlan, 'ai')}
             messages={aiMessages}
             input={aiInput}
             loading={aiLoading}
@@ -492,7 +519,14 @@ export default function App() {
           />
         )}
         {modal === 'upgrade' && (
-          <UpgradeModal theme={theme} mode={mode} onClose={() => setModal(null)} onUpgrade={handleUpgrade} />
+          <UpgradeModal
+            theme={theme}
+            mode={mode}
+            effPlan={effPlan}
+            trialLeft={trialLeft}
+            onClose={() => setModal(null)}
+            onUpgrade={handleUpgrade}
+          />
         )}
       </ModalShell>
     </div>

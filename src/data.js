@@ -148,10 +148,24 @@ export const ACADEMY_PRO_CARDS = [
     content: 'Achat >1k → amortissement 20-40%/an.\nFin d\'année: provisions ou achats anticipés.' },
 ];
 
+export const TRIAL_DAYS = 14;
+
 export const FREE_LIMITS = {
-  expenses: 3,
-  goals: 1,
-  ai: 0,
+  expenses: 5,
+  goals: 2,
+  ai: 3,
+};
+
+export const TRIAL_LIMITS = {
+  expenses: Infinity,
+  goals: Infinity,
+  ai: Infinity,
+};
+
+export const PREMIUM_LIMITS = {
+  expenses: Infinity,
+  goals: Infinity,
+  ai: Infinity,
 };
 
 export const CANTONS = [
