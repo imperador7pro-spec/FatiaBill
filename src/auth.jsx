@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, Sun, Moon, User, Briefcase } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export function AuthLoadingScreen() {
   return (
@@ -101,61 +101,3 @@ export function AuthScreen({ theme, onSignIn, onSignUp }) {
   );
 }
 
-export function ModeSelectionScreen({ theme, user, darkMode, onToggleDark, onSelectMode }) {
-  return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${theme.bg}`}>
-      <button
-        onClick={onToggleDark}
-        className={`absolute top-4 right-4 p-3 rounded-full z-10 ${darkMode ? 'bg-zinc-800 text-yellow-400' : 'bg-white text-stone-800 shadow-md'}`}
-      >
-        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-      <div className="max-w-5xl w-full">
-        <div className="text-center mb-10">
-          <h1 className={`text-5xl font-black italic tracking-tighter mb-2 ${theme.tx}`}>
-            FatiaBill<span className="text-emerald-500">.</span>
-          </h1>
-          <p className={`text-sm ${theme.mt}`}>
-            Bienvenue {user?.email?.split('@')[0]} ! Choisissez votre mode.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          <button
-            onClick={() => onSelectMode('private')}
-            className={`p-8 rounded-3xl border-2 cursor-pointer group text-left ${darkMode ? 'bg-zinc-900 border-zinc-800 hover:border-emerald-500' : 'bg-white border-stone-100 hover:border-emerald-500 shadow-xl'}`}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <User size={26} />
-              </div>
-              <div className="text-right">
-                <div className={`text-xl font-black ${theme.tx}`}>Gratuit</div>
-                <span className={`text-[9px] font-bold ${theme.mt}`}>Premium 9.-/mois</span>
-              </div>
-            </div>
-            <h2 className={`text-2xl font-black mb-2 ${theme.tx}`}>Employé / Privé</h2>
-            <p className={`${theme.mt} text-sm mb-5`}>Budget, épargne, Académie, coaching IA.</p>
-            <span className="block w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-center">Démarrer Privé</span>
-          </button>
-          <button
-            onClick={() => onSelectMode('pro')}
-            className={`p-8 rounded-3xl border-2 cursor-pointer group relative text-left ${darkMode ? 'bg-indigo-950/50 border-indigo-900 hover:border-indigo-500' : 'bg-stone-900 border-stone-900 hover:border-indigo-500 shadow-xl'}`}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <div className="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Briefcase size={26} />
-              </div>
-              <div className="text-right">
-                <div className="text-xl font-black text-white">19.-<span className="text-sm text-stone-400">/mois</span></div>
-              </div>
-            </div>
-            <div className="absolute top-5 right-5 bg-indigo-500 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Expert</div>
-            <h2 className="text-2xl font-black mb-2 text-white">Indépendant / Sàrl</h2>
-            <p className="text-stone-400 text-sm mb-5">Trésorerie, TVA, AVS, scanner, fiscal.</p>
-            <span className="block w-full py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-center">Démarrer Pro</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

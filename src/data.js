@@ -153,3 +153,94 @@ export const FREE_LIMITS = {
   goals: 1,
   ai: 0,
 };
+
+export const CANTONS = [
+  { code: 'AG', name: 'Argovie' },
+  { code: 'AI', name: 'Appenzell Rh.-Int.' },
+  { code: 'AR', name: 'Appenzell Rh.-Ext.' },
+  { code: 'BE', name: 'Berne' },
+  { code: 'BL', name: 'Bâle-Campagne' },
+  { code: 'BS', name: 'Bâle-Ville' },
+  { code: 'FR', name: 'Fribourg' },
+  { code: 'GE', name: 'Genève' },
+  { code: 'GL', name: 'Glaris' },
+  { code: 'GR', name: 'Grisons' },
+  { code: 'JU', name: 'Jura' },
+  { code: 'LU', name: 'Lucerne' },
+  { code: 'NE', name: 'Neuchâtel' },
+  { code: 'NW', name: 'Nidwald' },
+  { code: 'OW', name: 'Obwald' },
+  { code: 'SG', name: 'Saint-Gall' },
+  { code: 'SH', name: 'Schaffhouse' },
+  { code: 'SO', name: 'Soleure' },
+  { code: 'SZ', name: 'Schwyz' },
+  { code: 'TG', name: 'Thurgovie' },
+  { code: 'TI', name: 'Tessin' },
+  { code: 'UR', name: 'Uri' },
+  { code: 'VD', name: 'Vaud' },
+  { code: 'VS', name: 'Valais' },
+  { code: 'ZG', name: 'Zoug' },
+  { code: 'ZH', name: 'Zurich' },
+];
+
+export const NATIONALITY_OPTIONS = [
+  { value: 'CH', label: 'Citoyen·ne suisse' },
+  { value: 'permit_C', label: 'Permis C (établissement)' },
+  { value: 'permit_B', label: 'Permis B (séjour)' },
+  { value: 'permit_L', label: 'Permis L (courte durée)' },
+  { value: 'permit_G', label: 'Permis G (frontalier suisse)' },
+  { value: 'frontalier_FR', label: 'Frontalier·e France' },
+  { value: 'frontalier_DE', label: 'Frontalier·e Allemagne' },
+  { value: 'frontalier_IT', label: 'Frontalier·e Italie' },
+  { value: 'frontalier_AT', label: 'Frontalier·e Autriche' },
+  { value: 'other', label: 'Autre' },
+];
+
+export const CIVIL_STATUS_OPTIONS = [
+  { value: 'single', label: 'Célibataire' },
+  { value: 'married', label: 'Marié·e' },
+  { value: 'partnership', label: 'Partenariat enregistré' },
+  { value: 'divorced', label: 'Divorcé·e' },
+  { value: 'widowed', label: 'Veuf / Veuve' },
+];
+
+export const EMPLOYMENT_STATUS_OPTIONS = [
+  { value: 'employee', label: 'Salarié·e (secteur privé)' },
+  { value: 'public_servant', label: 'Fonctionnaire' },
+  { value: 'self_employed', label: 'Indépendant·e (en parallèle)' },
+  { value: 'apprentice', label: 'Apprenti·e' },
+  { value: 'student', label: 'Étudiant·e' },
+  { value: 'retired', label: 'Retraité·e' },
+  { value: 'unemployed', label: 'Sans emploi' },
+  { value: 'parental_leave', label: 'Congé parental' },
+  { value: 'other', label: 'Autre' },
+];
+
+export const BUSINESS_FORM_OPTIONS = [
+  { value: 'RI', label: 'Raison Individuelle', hint: 'Solo, aucun capital min. Responsabilité illimitée sur biens perso.' },
+  { value: 'Sarl', label: 'Sàrl', hint: 'Capital min. CHF 20\'000. Responsabilité limitée au capital.' },
+  { value: 'SA', label: 'SA', hint: 'Capital min. CHF 100\'000. Idéal pour lever des fonds.' },
+  { value: 'association', label: 'Association', hint: 'But non lucratif.' },
+  { value: 'other', label: 'Autre forme juridique' },
+];
+
+export const BUSINESS_SECTORS = [
+  'Conseil & Services aux entreprises',
+  'IT / Tech / Digital',
+  'Restauration & Hôtellerie',
+  'Commerce & Retail',
+  'Construction & Artisanat',
+  'Santé & Médical',
+  'Beauté & Bien-être',
+  'Arts & Création',
+  'Éducation & Formation',
+  'Transport & Logistique',
+  'Immobilier',
+  'Finance & Assurance',
+  'Marketing & Communication',
+  'Sport & Loisirs',
+  'Agriculture & Vigne',
+  'Autre',
+];
+
+export const LAMAL_FRANCHISES = [300, 500, 1000, 1500, 2000, 2500];
