@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Zap, Landmark, Flame, Crown, Sun, Moon, LogOut, Sparkles, AlertCircle,
-  CheckSquare, Target, GraduationCap, MessageCircle, Settings,
+  CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin,
   LayoutDashboard, Receipt, Camera, FileSignature, FileText, BookOpen,
 } from 'lucide-react';
 
@@ -93,6 +93,7 @@ function TrialBanner({ theme, isTrial, trialLeft, onUpgrade }) {
 const NAV_PRIVATE = [
   { key: 'dashboard', icon: CheckSquare },
   { key: 'savings', icon: Target },
+  { key: 'tax_sim', icon: MapPin, special: true },
   { key: 'academy', icon: GraduationCap, special: true },
   { key: 'ai', icon: MessageCircle, special: true },
   { key: 'setup', icon: Settings },
@@ -104,6 +105,7 @@ const NAV_PRO = [
   { key: 'invoices', icon: FileSignature, special: true },
   { key: 'scanner', icon: Camera },
   { key: 'tax_report', icon: FileText },
+  { key: 'tax_sim', icon: MapPin, special: true },
   { key: 'ai_pro', icon: MessageCircle, special: true },
   { key: 'academy_pro', icon: BookOpen },
   { key: 'setup', icon: Settings },
