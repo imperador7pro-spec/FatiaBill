@@ -8,7 +8,8 @@ import {
 } from './data.js';
 import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
-import { AuthLoadingScreen, AuthScreen, ModeSelectionScreen } from './auth.jsx';
+import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
+import { OnboardingWizard } from './onboarding.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import { PrivateDashboard } from './views/PrivateDashboard.jsx';
 import { Savings } from './views/Savings.jsx';
@@ -24,8 +25,6 @@ import {
   ModalShell, SalaryModal, TransactionModal, GoalModal, LessonModal, UpgradeModal,
 } from './modals.jsx';
 
-const COMPANY_NAME = 'Mon Entreprise Sàrl';
-
 export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -35,6 +34,8 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [salary, setSalary] = useState(0);
   const [salarySource, setSalarySource] = useState('Salaire Principal');
+  const [profile, setProfile] = useState(null);
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   const [expensesPrivate, setExpensesPrivate] = useState(DEFAULT_EXPENSES_PRIVATE);
   const [expensesPro, setExpensesPro] = useState(DEFAULT_EXPENSES_PRO);
@@ -74,11 +75,13 @@ export default function App() {
         setUser(u);
         const p = await db.getProfile(u.id);
         if (p) {
+          setProfile(p);
           setPlan(p.plan || 'free');
           setMode(p.mode || null);
           setSalary(p.salary || 0);
           setSalarySource(p.salary_source || 'Salaire Principal');
           setDarkMode(p.dark_mode || false);
+          setOnboardingDone(!!p.onboarding_completed);
         }
         const prog = await db.getProgress(u.id);
         if (prog) {
@@ -96,6 +99,8 @@ export default function App() {
         setUser(null);
         setMode(null);
         setPlan('free');
+        setProfile(null);
+        setOnboardingDone(false);
       }
     });
 
@@ -148,13 +153,18 @@ export default function App() {
     setUser(null);
     setMode(null);
     setPlan('free');
+    setProfile(null);
+    setOnboardingDone(false);
   };
 
-  const selectMode = async (m) => {
-    setMode(m);
-    setView(m === 'pro' ? 'pro_dashboard' : 'dashboard');
-    if (user) await db.updateProfile(user.id, { mode: m });
-    if (m === 'private') setTimeout(() => setModal('sal'), 300);
+  const handleOnboardingComplete = async (payload) => {
+    if (!user) return;
+    await db.updateProfile(user.id, payload);
+    setProfile((prev) => ({ ...(prev || {}), ...payload }));
+    setMode(payload.mode);
+    setOnboardingDone(true);
+    setView(payload.mode === 'pro' ? 'pro_dashboard' : 'dashboard');
+    if (payload.mode === 'private') setTimeout(() => setModal('sal'), 400);
   };
 
   const handleUpgrade = async () => {
@@ -337,14 +347,16 @@ export default function App() {
 
   if (authLoading) return <AuthLoadingScreen />;
   if (!user) return <AuthScreen theme={theme} onSignIn={handleSignIn} onSignUp={handleSignUp} />;
-  if (!mode) {
+  if (!onboardingDone) {
     return (
-      <ModeSelectionScreen
+      <OnboardingWizard
         theme={theme}
         user={user}
         darkMode={darkMode}
         onToggleDark={() => setDarkMode(!darkMode)}
-        onSelectMode={selectMode}
+        existingProfile={profile}
+        onComplete={handleOnboardingComplete}
+        onSignOut={handleSignOut}
       />
     );
   }
@@ -441,7 +453,7 @@ export default function App() {
         )}
 
         {mode === 'pro' && view === 'tax_report' && (
-          <TaxReport theme={theme} companyName={COMPANY_NAME} expenses={expenses} finance={finance} />
+          <TaxReport theme={theme} companyName={profile?.company_name || 'Mon Entreprise'} expenses={expenses} finance={finance} />
         )}
 
         {mode === 'pro' && view === 'academy_pro' && <GuidePro theme={theme} />}
