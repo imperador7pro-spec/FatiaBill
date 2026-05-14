@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Zap, Landmark, Flame, Crown, Sun, Moon, LogOut, Sparkles, AlertCircle,
-  CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin,
+  CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin, Coins,
   LayoutDashboard, Receipt, Camera, FileSignature, FileText, BookOpen,
 } from 'lucide-react';
 
@@ -92,6 +92,7 @@ function TrialBanner({ theme, isTrial, trialLeft, onUpgrade }) {
 
 const NAV_PRIVATE = [
   { key: 'dashboard', icon: CheckSquare },
+  { key: 'salary_breakdown', icon: Coins, special: true },
   { key: 'savings', icon: Target },
   { key: 'tax_sim', icon: MapPin, special: true },
   { key: 'academy', icon: GraduationCap, special: true },
