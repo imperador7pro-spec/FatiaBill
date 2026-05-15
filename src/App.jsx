@@ -757,6 +757,10 @@ export default function App() {
             expenses={expenses}
             setExpenses={setExpenses}
             onSaveProfile={saveProfileFields}
+            onAccountDeleted={async () => {
+              await auth.signOut();
+              window.location.href = '/';
+            }}
           />
         )}
         </Suspense>

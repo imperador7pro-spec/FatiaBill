@@ -10,6 +10,10 @@ export const auth = {
   signOut: () => supabase.auth.signOut(),
   getUser: async () => (await supabase.auth.getUser()).data.user,
   onAuthChange: (cb) => supabase.auth.onAuthStateChange(cb),
+  getAccessToken: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  },
 };
 
 const newId = () =>
