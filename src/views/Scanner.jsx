@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
 import {
   Camera, Sparkles, Check, TrendingUp, Receipt, Archive, FolderOpen, Tag,
-  Upload, X, AlertCircle, Edit3,
+  Upload, X, AlertCircle, Edit3, FileText,
 } from 'lucide-react';
 import { EXPENSE_CATEGORIES } from '../data.js';
 
 const MAX_DIMENSION = 1280;
 const JPEG_QUALITY = 0.85;
+const PDF_MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
 async function downscaleImage(file) {
   return new Promise((resolve, reject) => {
@@ -23,11 +24,20 @@ async function downscaleImage(file) {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
         const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
-        resolve(dataUrl);
+        resolve({ dataUrl, mimeType: 'image/jpeg' });
       };
       img.onerror = reject;
       img.src = e.target.result;
     };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function readPdfAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve({ dataUrl: e.target.result, mimeType: 'application/pdf' });
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
@@ -39,18 +49,28 @@ export function Scanner({
 }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(null); // { dataUrl, mimeType, name }
   const [editing, setEditing] = useState(false);
 
   const handleFile = async (file) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) return;
+    onClearError?.();
     try {
-      const dataUrl = await downscaleImage(file);
-      setPreview(dataUrl);
-      onScan(dataUrl);
+      let result;
+      if (file.type === 'application/pdf') {
+        if (file.size > PDF_MAX_BYTES) {
+          throw new Error(`PDF trop volumineux (max ${Math.round(PDF_MAX_BYTES / 1024 / 1024)} MB)`);
+        }
+        result = await readPdfAsBase64(file);
+      } else if (file.type.startsWith('image/')) {
+        result = await downscaleImage(file);
+      } else {
+        throw new Error('Format non supporté — utilisez JPG, PNG ou PDF');
+      }
+      setPreview({ ...result, name: file.name, sizeKb: Math.round(file.size / 1024) });
+      onScan(result.dataUrl, result.mimeType);
     } catch (e) {
-      console.error(e);
+      onScan(null, null, e?.message || 'Lecture du fichier impossible');
     }
   };
 
@@ -90,14 +110,14 @@ export function Scanner({
           >
             <Upload size={26} className="text-indigo-500" />
             <span className={`font-bold text-xs ${theme.tx}`}>Fichier</span>
-            <span className={`text-[9px] ${theme.mt}`}>JPG / PNG / HEIC</span>
+            <span className={`text-[9px] ${theme.mt}`}>JPG / PNG / HEIC / PDF</span>
           </button>
           <input
             ref={cameraInputRef} type="file" accept="image/*" capture="environment"
             className="hidden" onChange={(e) => handleFile(e.target.files?.[0])}
           />
           <input
-            ref={fileInputRef} type="file" accept="image/*"
+            ref={fileInputRef} type="file" accept="image/*,application/pdf"
             className="hidden" onChange={(e) => handleFile(e.target.files?.[0])}
           />
         </div>
@@ -105,7 +125,17 @@ export function Scanner({
 
       {preview && (
         <div className="relative">
-          <img src={preview} alt="aperçu" className="w-full rounded-2xl border-2 border-indigo-500" />
+          {preview.mimeType === 'application/pdf' ? (
+            <div className={`p-8 rounded-2xl border-2 border-indigo-500 flex flex-col items-center gap-3 ${theme.cd}`}>
+              <FileText size={48} className="text-indigo-500" />
+              <div className="text-center">
+                <p className={`font-black text-sm ${theme.tx}`}>{preview.name || 'document.pdf'}</p>
+                <p className={`text-[10px] ${theme.mt}`}>PDF · {preview.sizeKb} KB</p>
+              </div>
+            </div>
+          ) : (
+            <img src={preview.dataUrl} alt="aperçu" className="w-full rounded-2xl border-2 border-indigo-500" />
+          )}
           {!scanning && !scanResult && (
             <button onClick={reset} className="absolute top-2 right-2 bg-black/70 text-white p-2 rounded-full">
               <X size={16} />

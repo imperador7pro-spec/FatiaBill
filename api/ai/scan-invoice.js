@@ -1,10 +1,10 @@
 export const config = {
   api: {
-    bodyParser: { sizeLimit: '6mb' }
+    bodyParser: { sizeLimit: '10mb' }
   }
 };
 
-const SYSTEM_PROMPT = `Tu es un assistant OCR spécialisé dans les factures et reçus suisses. Tu analyses une image de facture/reçu et tu réponds UNIQUEMENT avec un objet JSON valide (pas de markdown, pas de texte avant ou après) avec ces champs:
+const SYSTEM_PROMPT = `Tu es un assistant OCR spécialisé dans les factures et reçus suisses. Tu analyses un document (image ou PDF) de facture/reçu et tu réponds UNIQUEMENT avec un objet JSON valide (pas de markdown, pas de texte avant ou après) avec ces champs:
 
 {
   "label": "Description courte (ex: 'Migros - Courses', 'Restaurant Le Comptoir', 'Facture client ACME SA')",
@@ -45,6 +45,12 @@ export default async function handler(req, res) {
       ? image_base64.split(',')[1]
       : image_base64;
     const mediaType = mime_type || 'image/jpeg';
+    const isPdf = mediaType === 'application/pdf';
+
+    const sourceBlock = {
+      type: isPdf ? 'document' : 'image',
+      source: { type: 'base64', media_type: mediaType, data: cleanBase64 },
+    };
 
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -60,13 +66,10 @@ export default async function handler(req, res) {
         messages: [{
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: cleanBase64 }
-            },
+            sourceBlock,
             {
               type: 'text',
-              text: 'Analyse cette facture/reçu suisse et réponds UNIQUEMENT en JSON.'
+              text: 'Analyse ce document (facture / reçu suisse) et réponds UNIQUEMENT en JSON.'
             }
           ]
         }]
@@ -76,7 +79,14 @@ export default async function handler(req, res) {
     const data = await r.json();
     if (!r.ok) {
       console.error('Anthropic Vision error:', data);
-      return res.status(502).json({ error: data?.error?.message || 'Service Vision indisponible' });
+      const upstream = data?.error?.message || '';
+      let userFacing = upstream || 'Service Vision indisponible';
+      if (r.status === 401 || /invalid x-api-key|authentication/i.test(upstream)) {
+        userFacing = 'Clé Anthropic invalide ou suspendue. Vérifiez ANTHROPIC_API_KEY dans Vercel ou regénérez sur console.anthropic.com.';
+      } else if (r.status === 429) {
+        userFacing = 'Quota Anthropic atteint. Augmentez la limite sur console.anthropic.com.';
+      }
+      return res.status(502).json({ error: userFacing });
     }
 
     const text = data.content?.map(c => c.text || '').join('').trim();
