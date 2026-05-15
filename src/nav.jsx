@@ -4,6 +4,7 @@ import {
   CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin, Coins, LifeBuoy,
   LayoutDashboard, Receipt, Camera, FileSignature, FileText, BookOpen,
 } from 'lucide-react';
+import { Logo } from './logo.jsx';
 
 export function TopNav({ theme, mode, xp, streak, effPlan, trialLeft, trialExpired, onUpgrade, onToggleDark, onSignOut }) {
   const isPremium = effPlan === 'premium';
@@ -16,9 +17,7 @@ export function TopNav({ theme, mode, xp, streak, effPlan, trialLeft, trialExpir
           <div className={`p-1.5 rounded-xl text-white bg-${theme.accent}-600`}>
             {mode === 'pro' ? <Landmark size={15} /> : <Zap size={15} />}
           </div>
-          <span className="font-black text-lg tracking-tighter">
-            FatiaBill<span className={`text-${theme.accent}-500`}>.</span>
-          </span>
+          <Logo size="md" />
         </div>
         <div className="flex items-center gap-1.5">
           {mode === 'private' && xp > 0 && (

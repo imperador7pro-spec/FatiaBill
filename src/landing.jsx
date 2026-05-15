@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ArrowRight, Play, Sun, Moon, Check, Sparkles, MapPin, ShieldCheck,
-  Lock, FileText, Camera, GraduationCap, MessageCircle, LifeBuoy, Coins,
-  ChevronRight, Send, Wifi, Signal, BatteryFull, ChevronUp,
+  ArrowRight, Sun, Moon, Check, Sparkles, MapPin, FileText, Camera,
+  GraduationCap, LifeBuoy, Send, Wifi, Signal, BatteryFull, ChevronUp,
 } from 'lucide-react';
+import { Logo } from './logo.jsx';
 
 const ACCENT = 'text-emerald-600';
 const SERIF = 'font-display';
@@ -80,8 +80,8 @@ function TopBar({ t, darkMode, onToggleDark, onSignUp, onSignIn }) {
   return (
     <nav className={`sticky top-0 z-30 border-b backdrop-blur-xl ${t.dark ? 'bg-zinc-950/85 border-zinc-800' : 'bg-white/85 border-zinc-100'}`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" className={`text-xl tracking-tight ${SERIF}`}>
-          FatiaBill<span className={ACCENT}>.</span>
+        <a href="#" className="inline-flex items-center">
+          <Logo size="md" />
         </a>
         <div className="flex items-center gap-3">
           <button onClick={onToggleDark} className={`p-2 rounded-full ${t.dark ? 'text-yellow-400 bg-zinc-900' : 'text-zinc-500 bg-zinc-100'}`}>
@@ -120,8 +120,8 @@ function Hero({ t, onSignUp }) {
             <button onClick={onSignUp} className={`px-6 py-3.5 ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} font-bold rounded-full text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform`}>
               Ouvrir mon compte <ArrowRight size={14} />
             </button>
-            <button onClick={() => document.getElementById('coach')?.scrollIntoView({ behavior: 'smooth' })} className={`px-6 py-3.5 font-bold text-sm rounded-full border ${t.bd} ${t.tx} flex items-center justify-center gap-2 ${t.dark ? 'hover:bg-zinc-900' : 'hover:bg-zinc-50'} transition-colors`}>
-              <Play size={12} fill="currentColor" /> Voir la démo
+            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className={`px-6 py-3.5 font-bold text-sm rounded-full border ${t.bd} ${t.tx} flex items-center justify-center gap-2 ${t.dark ? 'hover:bg-zinc-900' : 'hover:bg-zinc-50'} transition-colors`}>
+              Comment ça marche <ArrowRight size={12} />
             </button>
           </div>
 
@@ -416,7 +416,7 @@ function HowItWorks({ t, onSignUp }) {
     { n: '03', title: 'Coach + outils prêts', body: 'Dashboard, scanner, simulateur, coach IA contextuel.', sub: '14 jours illimités' },
   ];
   return (
-    <section className={`py-20 md:py-28 ${t.bg}`}>
+    <section id="how-it-works" className={`py-20 md:py-28 ${t.bg}`}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-start mb-12 md:mb-16">
           <div>
@@ -808,7 +808,7 @@ function Footer({ t }) {
     <footer className={`border-t py-12 ${t.bd}`}>
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className={`${SERIF} text-xl`}>FatiaBill<span className={ACCENT}>.</span></span>
+          <Logo size="md" />
           <span className={`text-[10px] ${t.mt}`}>· Conçu en Suisse 🇨🇭</span>
         </div>
         <div className={`flex items-center gap-4 text-[11px] font-bold ${t.mt}`}>

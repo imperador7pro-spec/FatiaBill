@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Logo } from './logo.jsx';
 
 export function AuthLoadingScreen() {
   return (
@@ -40,9 +41,7 @@ export function AuthScreen({ theme, initialView = 'login', onSignIn, onSignUp, o
           </button>
         )}
         <div className="text-center mb-8">
-          <h1 className={`text-4xl font-black italic tracking-tighter mb-2 ${theme.tx}`}>
-            FatiaBill<span className="text-emerald-500">.</span>
-          </h1>
+          <Logo size="xl" className="mb-2" />
           <p className={`text-sm ${theme.mt}`}>Copilote financier suisse</p>
         </div>
         <div className={`p-6 rounded-3xl border ${theme.cd} ${theme.bd} shadow-xl`}>
