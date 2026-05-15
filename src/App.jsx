@@ -12,6 +12,7 @@ import {
 import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
+import { Landing } from './landing.jsx';
 import { OnboardingWizard } from './onboarding.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import { PrivateDashboard } from './views/PrivateDashboard.jsx';
@@ -90,6 +91,7 @@ export default function App() {
   const [editingGoalIdx, setEditingGoalIdx] = useState(null);
   const [goalInitial, setGoalInitial] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [authView, setAuthView] = useState(null); // null = landing, 'login' or 'signup' = AuthScreen
   const expensesPrivSnapshot = useRef(null);
   const expensesProSnapshot = useRef(null);
 
@@ -101,50 +103,55 @@ export default function App() {
   const setExpenses = mode === 'private' ? setExpensesPrivate : setExpensesPro;
   const theme = getTheme(darkMode, mode);
 
+  const loadAllUserData = useCallback(async (u) => {
+    if (!u) return;
+    const p = await db.getProfile(u.id);
+    if (p) {
+      setProfile(p);
+      setPlan(p.plan || 'free');
+      setMode(p.mode || null);
+      setSalary(p.salary || 0);
+      setSalarySource(p.salary_source || 'Salaire Principal');
+      setDarkMode(p.dark_mode || false);
+      setOnboardingDone(!!p.onboarding_completed);
+    }
+    const [prog, expPriv, expPro, txs, gls, docs] = await Promise.all([
+      db.getProgress(u.id),
+      db.getExpenses(u.id, 'private'),
+      db.getExpenses(u.id, 'pro'),
+      db.getTransactions(u.id),
+      db.getGoals(u.id),
+      db.getDocuments(u.id),
+    ]);
+    if (prog) {
+      setCompletedLessons(prog.completed_lessons || []);
+      setXp(prog.xp || 0);
+      setStreak(prog.streak || 0);
+    }
+    const seedPriv = expPriv.length > 0
+      ? expPriv
+      : DEFAULT_EXPENSES_PRIVATE.map((e) => ({ ...e, id: db.newId() }));
+    const seedPro = expPro.length > 0
+      ? expPro
+      : DEFAULT_EXPENSES_PRO.map((e) => ({ ...e, id: db.newId() }));
+    setExpensesPrivate(seedPriv);
+    setExpensesPro(seedPro);
+    expensesPrivSnapshot.current = seedPriv;
+    expensesProSnapshot.current = seedPro;
+    if (expPriv.length === 0) seedPriv.forEach((e) => db.upsertExpense(e, u.id, 'private'));
+    if (expPro.length === 0) seedPro.forEach((e) => db.upsertExpense(e, u.id, 'pro'));
+    setTransactions(txs);
+    setGoals(gls);
+    setDocuments(docs);
+    setDataLoaded(true);
+  }, []);
+
   useEffect(() => {
     const checkUser = async () => {
       const u = await auth.getUser();
       if (u) {
         setUser(u);
-        const p = await db.getProfile(u.id);
-        if (p) {
-          setProfile(p);
-          setPlan(p.plan || 'free');
-          setMode(p.mode || null);
-          setSalary(p.salary || 0);
-          setSalarySource(p.salary_source || 'Salaire Principal');
-          setDarkMode(p.dark_mode || false);
-          setOnboardingDone(!!p.onboarding_completed);
-        }
-        const [prog, expPriv, expPro, txs, gls, docs] = await Promise.all([
-          db.getProgress(u.id),
-          db.getExpenses(u.id, 'private'),
-          db.getExpenses(u.id, 'pro'),
-          db.getTransactions(u.id),
-          db.getGoals(u.id),
-          db.getDocuments(u.id),
-        ]);
-        if (prog) {
-          setCompletedLessons(prog.completed_lessons || []);
-          setXp(prog.xp || 0);
-          setStreak(prog.streak || 0);
-        }
-        const seedPriv = expPriv.length > 0
-          ? expPriv
-          : DEFAULT_EXPENSES_PRIVATE.map((e) => ({ ...e, id: db.newId() }));
-        const seedPro = expPro.length > 0
-          ? expPro
-          : DEFAULT_EXPENSES_PRO.map((e) => ({ ...e, id: db.newId() }));
-        setExpensesPrivate(seedPriv);
-        setExpensesPro(seedPro);
-        expensesPrivSnapshot.current = seedPriv;
-        expensesProSnapshot.current = seedPro;
-        if (expPriv.length === 0) seedPriv.forEach((e) => db.upsertExpense(e, u.id, 'private'));
-        if (expPro.length === 0) seedPro.forEach((e) => db.upsertExpense(e, u.id, 'pro'));
-        setTransactions(txs);
-        setGoals(gls);
-        setDocuments(docs);
-        setDataLoaded(true);
+        await loadAllUserData(u);
       }
       setAuthLoading(false);
     };
@@ -214,7 +221,10 @@ export default function App() {
 
   const handleSignUp = async (email, password) => {
     const { data, error } = await auth.signUp(email, password);
-    if (!error && data?.user) setUser(data.user);
+    if (!error && data?.user) {
+      setUser(data.user);
+      await loadAllUserData(data.user);
+    }
     return { error };
   };
 
@@ -222,11 +232,7 @@ export default function App() {
     const { data, error } = await auth.signIn(email, password);
     if (!error && data?.user) {
       setUser(data.user);
-      const p = await db.getProfile(data.user.id);
-      if (p?.mode) {
-        setPlan(p.plan || 'free');
-        setSalary(p.salary || 0);
-      }
+      await loadAllUserData(data.user);
     }
     return { error };
   };
@@ -429,7 +435,11 @@ export default function App() {
     if (user && removed) db.deleteGoal(removed.id);
   };
 
-  const runScan = async (imageDataUrl) => {
+  const runScan = async (imageDataUrl, mimeType, clientError) => {
+    if (clientError) {
+      setScanError(clientError);
+      return;
+    }
     if (!imageDataUrl) return;
     const period = currentPeriod();
     const usedThisPeriod = profile?.ai_messages_period === period
@@ -447,7 +457,7 @@ export default function App() {
       const r = await fetch('/api/ai/scan-invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image_base64: imageDataUrl, mime_type: 'image/jpeg' }),
+        body: JSON.stringify({ image_base64: imageDataUrl, mime_type: mimeType || 'image/jpeg' }),
       });
       const d = await r.json();
       if (!r.ok || d.error) {
@@ -534,7 +544,28 @@ export default function App() {
   };
 
   if (authLoading) return <AuthLoadingScreen />;
-  if (!user) return <AuthScreen theme={theme} onSignIn={handleSignIn} onSignUp={handleSignUp} />;
+  if (!user) {
+    if (authView) {
+      return (
+        <AuthScreen
+          theme={theme}
+          initialView={authView}
+          onSignIn={handleSignIn}
+          onSignUp={handleSignUp}
+          onBack={() => setAuthView(null)}
+        />
+      );
+    }
+    return (
+      <Landing
+        theme={theme}
+        darkMode={darkMode}
+        onToggleDark={() => setDarkMode(!darkMode)}
+        onSignIn={() => setAuthView('login')}
+        onSignUp={() => setAuthView('signup')}
+      />
+    );
+  }
   if (!onboardingDone) {
     return (
       <OnboardingWizard
