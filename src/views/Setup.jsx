@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import {
   User, Building2, Wallet, Plus, Trash2, Save, Check, AlertCircle,
+  ShieldAlert, Download, Trash, X,
 } from 'lucide-react';
 import {
   CANTONS, NATIONALITY_OPTIONS, CIVIL_STATUS_OPTIONS,
   EMPLOYMENT_STATUS_OPTIONS, BUSINESS_FORM_OPTIONS, BUSINESS_SECTORS, LAMAL_FRANCHISES,
 } from '../data.js';
+import { auth } from '../supabase.js';
 
 const isValidIBAN = (iban) => {
   if (!iban) return true;
@@ -13,13 +15,14 @@ const isValidIBAN = (iban) => {
   return /^CH\d{19}$/.test(clean) || /^LI\d{19}$/.test(clean);
 };
 
-export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfile }) {
+export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfile, onAccountDeleted }) {
   const [section, setSection] = useState('profile');
 
   const sections = [
     { id: 'profile', label: 'Mon profil', icon: User, available: true },
     { id: 'business', label: 'Mon entreprise', icon: Building2, available: mode === 'pro' },
     { id: 'expenses', label: 'Charges fixes', icon: Wallet, available: true },
+    { id: 'data', label: 'Mes données', icon: ShieldAlert, available: true },
   ].filter((s) => s.available);
 
   return (
@@ -54,6 +57,211 @@ export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfi
       {section === 'expenses' && (
         <ExpensesSection theme={theme} expenses={expenses} setExpenses={setExpenses} />
       )}
+      {section === 'data' && (
+        <DataRightsSection theme={theme} onAccountDeleted={onAccountDeleted} />
+      )}
+    </div>
+  );
+}
+
+function DataRightsSection({ theme, onAccountDeleted }) {
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleExport = async () => {
+    setExportError(null);
+    setExporting(true);
+    try {
+      const token = await auth.getAccessToken();
+      if (!token) throw new Error('Session expirée — reconnectez-vous');
+      const r = await fetch('/api/account/export', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => ({}));
+        throw new Error(d.error || `Erreur ${r.status}`);
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fatiabill-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setExportError(e?.message || 'Erreur export');
+    }
+    setExporting(false);
+  };
+
+  return (
+    <>
+      <Card theme={theme} title="Exporter mes données">
+        <p className={`text-xs ${theme.mt} mb-3`}>
+          Téléchargez l'intégralité de vos données FatiaBill (profil, transactions, objectifs, scans, progression Académie) dans un fichier JSON lisible et portable. <strong className={theme.tx}>Conforme RGPD art. 20 — droit à la portabilité</strong>.
+        </p>
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black ${theme.dk ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-zinc-100 hover:bg-zinc-200'} ${theme.tx} transition-colors disabled:opacity-60`}
+        >
+          {exporting ? (
+            <>
+              <div className="w-3 h-3 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+              Préparation…
+            </>
+          ) : (
+            <>
+              <Download size={13} /> Télécharger ma copie (.json)
+            </>
+          )}
+        </button>
+        {exportError && (
+          <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-rose-500">
+            <AlertCircle size={12} /> {exportError}
+          </div>
+        )}
+      </Card>
+
+      <div className={`p-5 rounded-2xl border-2 border-rose-500/30 ${theme.dk ? 'bg-rose-950/20' : 'bg-rose-50/40'} space-y-4`}>
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/15 text-rose-500 flex items-center justify-center flex-shrink-0">
+            <ShieldAlert size={18} />
+          </div>
+          <div className="flex-1">
+            <h3 className={`font-black text-base ${theme.tx}`}>Supprimer mon compte</h3>
+            <p className={`text-[11px] ${theme.mt} mt-1 leading-relaxed`}>
+              Suppression définitive de votre compte et de toutes les données associées sous 30 jours. <strong>Cette action est irréversible.</strong> Conforme RGPD art. 17 — droit à l'oubli.
+            </p>
+          </div>
+        </div>
+        <ul className={`text-[11px] space-y-1 pl-12 ${theme.mt}`}>
+          <li>• Toutes vos données (transactions, objectifs, scans, profil) supprimées</li>
+          <li>• Votre abonnement Premium est annulé immédiatement (pas de remboursement au pro rata)</li>
+          <li>• Aucun email de relance</li>
+          <li>• Vous pourrez recréer un compte avec le même email plus tard</li>
+        </ul>
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="ml-12 px-4 py-2.5 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center gap-2"
+        >
+          <Trash size={13} /> Supprimer définitivement mon compte
+        </button>
+      </div>
+
+      {showDeleteModal && (
+        <DeleteAccountModal
+          theme={theme}
+          onClose={() => setShowDeleteModal(false)}
+          onSuccess={onAccountDeleted}
+        />
+      )}
+    </>
+  );
+}
+
+function DeleteAccountModal({ theme, onClose, onSuccess }) {
+  const [confirmation, setConfirmation] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState(null);
+  const canDelete = confirmation === 'SUPPRIMER';
+
+  const handleDelete = async () => {
+    if (!canDelete) return;
+    setError(null);
+    setDeleting(true);
+    try {
+      const token = await auth.getAccessToken();
+      if (!token) throw new Error('Session expirée — reconnectez-vous');
+      const r = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ confirmation }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.error) throw new Error(d.error || `Erreur ${r.status}`);
+      onSuccess?.();
+    } catch (e) {
+      setError(e?.message || 'Erreur suppression');
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={onClose}>
+      <div
+        className={`w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden sm:rounded-3xl rounded-t-3xl shadow-2xl ${theme.cd} border ${theme.bd}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative p-5 text-white bg-gradient-to-br from-rose-600 to-rose-800">
+          <button onClick={onClose} className="absolute top-3 right-3 bg-white/15 p-1.5 rounded-full hover:bg-white/25 transition-colors">
+            <X size={14} />
+          </button>
+          <ShieldAlert size={26} className="mb-2" />
+          <h2 className="text-lg font-black">Suppression définitive</h2>
+          <p className="text-xs opacity-90 mt-0.5">Cette action ne peut pas être annulée.</p>
+        </div>
+
+        <div className="p-5 space-y-3 overflow-y-auto flex-1">
+          <p className={`text-xs leading-relaxed ${theme.tx}`}>
+            En cliquant sur "Supprimer définitivement", vous demandez la suppression complète de votre compte FatiaBill et de toutes les données associées.
+          </p>
+          <p className={`text-xs leading-relaxed ${theme.mt}`}>
+            La suppression est effective immédiatement côté authentification. Vos données opérationnelles (transactions, objectifs, scans, profil) seront supprimées sous 30 jours. Les données comptables légalement obligatoires (factures émises par FatiaBill à votre nom) peuvent être conservées 10 ans, conformément à l'article 958f du Code des obligations suisse.
+          </p>
+          <div>
+            <label className="text-[8px] font-black uppercase text-stone-400 tracking-wider">
+              Pour confirmer, tapez exactement : <strong className="text-rose-500">SUPPRIMER</strong>
+            </label>
+            <input
+              type="text"
+              value={confirmation}
+              onChange={(e) => setConfirmation(e.target.value)}
+              placeholder="SUPPRIMER"
+              autoFocus
+              className={`w-full mt-1 border rounded-xl p-3 text-sm font-bold outline-none ${theme.inp} focus:border-rose-500`}
+            />
+          </div>
+          {error && (
+            <div className={`p-3 rounded-xl text-[11px] font-bold flex items-start gap-2 ${theme.dk ? 'bg-rose-950/40 text-rose-300 border border-rose-500/30' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+              <AlertCircle size={14} className="flex-shrink-0 mt-0.5" /> {error}
+            </div>
+          )}
+        </div>
+
+        <div className={`p-4 border-t ${theme.bd} flex gap-2`}>
+          <button
+            onClick={onClose}
+            disabled={deleting}
+            className={`flex-1 py-3 rounded-2xl text-sm font-black ${theme.sf} ${theme.tx} ${theme.hv} transition-colors disabled:opacity-60`}
+          >
+            Annuler
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={!canDelete || deleting}
+            className={`flex-1 py-3 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all ${canDelete && !deleting
+              ? 'bg-rose-600 hover:bg-rose-500 text-white'
+              : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
+          >
+            {deleting ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Suppression…
+              </>
+            ) : (
+              'Supprimer définitivement'
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
