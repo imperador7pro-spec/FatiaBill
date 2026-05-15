@@ -8,7 +8,7 @@ import { Logo } from './logo.jsx';
 const ACCENT = 'text-emerald-600';
 const SERIF = 'font-display';
 
-export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
+export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn, onOpenLegal }) {
   const dark = theme.dk;
   const bg = dark ? 'bg-zinc-950' : 'bg-white';
   const tx = dark ? 'text-zinc-100' : 'text-zinc-900';
@@ -29,7 +29,7 @@ export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
       <SOSPoursuite t={tokens} onSignUp={onSignUp} />
       <Pricing t={tokens} onSignUp={onSignUp} />
       <FAQ t={tokens} />
-      <Footer t={tokens} />
+      <Footer t={tokens} onOpenLegal={onOpenLegal} />
     </div>
   );
 }
@@ -774,10 +774,10 @@ function FAQ({ t }) {
 // Footer
 // ─────────────────────────────────────────────────
 
-function Footer({ t }) {
+function Footer({ t, onOpenLegal }) {
   return (
-    <footer className={`border-t py-12 ${t.bd}`}>
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <footer className={`border-t py-10 ${t.bd}`}>
+      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
           <div className="flex items-center gap-3">
             <Logo size="md" />
@@ -785,11 +785,18 @@ function Footer({ t }) {
           </div>
           <span className={`text-[10px] ${t.mt}`}>Un produit Duares Systems · Aclens</span>
         </div>
-        <div className={`flex items-center gap-4 text-[11px] font-bold ${t.mt}`}>
-          <a href="mailto:hello@fatiabill.ch" className="hover:text-emerald-600 transition-colors">hello@fatiabill.ch</a>
+        <nav className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold ${t.mt}`}>
+          <button onClick={() => onOpenLegal?.('cgu')} className="hover:text-emerald-600 transition-colors">CGU</button>
           <span>·</span>
-          <span>© {new Date().getFullYear()} FatiaBill</span>
-        </div>
+          <button onClick={() => onOpenLegal?.('privacy')} className="hover:text-emerald-600 transition-colors">Confidentialité</button>
+          <span>·</span>
+          <button onClick={() => onOpenLegal?.('mentions')} className="hover:text-emerald-600 transition-colors">Mentions légales</button>
+          <span>·</span>
+          <a href="mailto:hello@fatiabill.ch" className="hover:text-emerald-600 transition-colors">hello@fatiabill.ch</a>
+        </nav>
+      </div>
+      <div className={`max-w-6xl mx-auto px-6 mt-6 text-center md:text-right text-[10px] ${t.mt}`}>
+        © {new Date().getFullYear()} Duares Systems — Tous droits réservés
       </div>
     </footer>
   );
