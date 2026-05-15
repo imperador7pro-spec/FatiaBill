@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export function AuthLoadingScreen() {
   return (
@@ -12,8 +12,8 @@ export function AuthLoadingScreen() {
   );
 }
 
-export function AuthScreen({ theme, onSignIn, onSignUp }) {
-  const [view, setView] = useState('login');
+export function AuthScreen({ theme, initialView = 'login', onSignIn, onSignUp, onBack }) {
+  const [view, setView] = useState(initialView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -31,6 +31,14 @@ export function AuthScreen({ theme, onSignIn, onSignUp }) {
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 ${theme.bg}`}>
       <div className="max-w-sm w-full">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className={`flex items-center gap-1.5 text-xs font-bold mb-6 ${theme.mt} hover:${theme.tx} transition-colors`}
+          >
+            <ArrowLeft size={14} /> Retour à l'accueil
+          </button>
+        )}
         <div className="text-center mb-8">
           <h1 className={`text-4xl font-black italic tracking-tighter mb-2 ${theme.tx}`}>
             FatiaBill<span className="text-emerald-500">.</span>

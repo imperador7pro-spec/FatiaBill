@@ -1,0 +1,439 @@
+import React from 'react';
+import {
+  Crown, Sparkles, Camera, FileSignature, MapPin, MessageCircle, GraduationCap,
+  Check, X, ArrowRight, Shield, Sun, Moon, Coins, Building2, Receipt,
+  Globe, Heart, Users, ChevronRight,
+} from 'lucide-react';
+
+export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
+  return (
+    <div className={`min-h-screen ${theme.bg} ${theme.tx}`}>
+      <TopBar theme={theme} darkMode={darkMode} onToggleDark={onToggleDark} onSignUp={onSignUp} onSignIn={onSignIn} />
+      <Hero theme={theme} onSignUp={onSignUp} />
+      <TrustBand theme={theme} />
+      <Problem theme={theme} />
+      <Features theme={theme} />
+      <Comparison theme={theme} />
+      <Pricing theme={theme} onSignUp={onSignUp} />
+      <FAQ theme={theme} />
+      <Footer theme={theme} />
+    </div>
+  );
+}
+
+function TopBar({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
+  return (
+    <nav className={`sticky top-0 z-30 border-b backdrop-blur-xl ${theme.dk ? 'bg-zinc-950/80 border-zinc-800' : 'bg-white/80 border-stone-200'}`}>
+      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <a href="#" className="flex items-center gap-2">
+          <span className="font-black text-xl italic tracking-tighter">
+            FatiaBill<span className="text-emerald-500">.</span>
+          </span>
+        </a>
+        <div className="flex items-center gap-2">
+          <button onClick={onToggleDark} className={`p-2 rounded-full ${theme.dk ? 'text-yellow-400 bg-zinc-900' : 'text-stone-500 bg-stone-100'}`}>
+            {theme.dk ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+          <button onClick={onSignIn} className={`text-xs font-bold px-3 py-1.5 rounded-lg ${theme.mt} hover:${theme.tx}`}>
+            Se connecter
+          </button>
+          <button onClick={onSignUp} className="text-xs font-black px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors">
+            Essai gratuit
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Hero({ theme, onSignUp }) {
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-12 md:py-20">
+      <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-4 ${theme.dk ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+            <Sparkles size={11} /> Conçu pour la Suisse 2025
+          </div>
+          <h1 className={`text-4xl md:text-5xl font-black tracking-tight leading-tight ${theme.tx}`}>
+            Le copilote financier des Suisses qui en ont assez de{' '}
+            <span className="text-emerald-500">payer 30% d'impôts en trop</span>.
+          </h1>
+          <p className={`text-base mt-5 leading-relaxed ${theme.mt}`}>
+            Calculs personnalisés par canton, scanner factures IA, QR-bills conformes, 66 leçons sur la fiscalité suisse, coach IA qui connaît votre situation. Tout dans une seule app — à partir de <strong className={theme.tx}>9 CHF/mois</strong>.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 mt-7">
+            <button onClick={onSignUp} className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]">
+              Démarrer l'essai 14 jours <ArrowRight size={16} />
+            </button>
+            <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className={`px-6 py-3.5 font-black text-sm rounded-2xl border-2 ${theme.bd} ${theme.tx} ${theme.hv} transition-colors`}>
+              Voir ce que ça fait
+            </button>
+          </div>
+          <p className={`text-[11px] mt-3 ${theme.mt}`}>
+            Sans carte bancaire · Annulable en 1 clic · Données hébergées en Suisse
+          </p>
+        </div>
+        <HeroVisual theme={theme} />
+      </div>
+    </section>
+  );
+}
+
+function HeroVisual({ theme }) {
+  return (
+    <div className="relative">
+      <div className={`p-5 rounded-3xl border-2 shadow-2xl ${theme.cd} ${theme.bd}`}>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center">
+            <MapPin size={14} />
+          </div>
+          <div>
+            <p className={`text-[9px] font-black uppercase tracking-wider ${theme.mt}`}>Simulateur fiscal</p>
+            <p className={`text-xs font-black ${theme.tx}`}>26 cantons comparés</p>
+          </div>
+        </div>
+        <div className={`p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-3`}>
+          <p className={`text-[9px] font-black uppercase ${theme.dk ? 'text-emerald-300' : 'text-emerald-700'}`}>Économie max possible</p>
+          <p className="text-2xl font-black tabular-nums">CHF 8'500 <span className="text-xs text-stone-500">/ an</span></p>
+          <p className={`text-[10px] ${theme.mt}`}>En déménageant de Genève à Zoug</p>
+        </div>
+        <div className="space-y-1.5">
+          {[
+            { c: 'Zoug', t: 9000, rank: 1, color: 'emerald' },
+            { c: 'Schwyz', t: 10200, rank: 2, color: 'emerald' },
+            { c: 'Vaud', t: 17000, rank: 24, color: null },
+            { c: 'Genève', t: 17500, rank: 26, color: 'rose', current: true },
+          ].map((r) => (
+            <div key={r.c} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${r.current ? (theme.dk ? 'bg-rose-950/40' : 'bg-rose-50') : ''}`}>
+              <div className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-black ${
+                r.color === 'emerald' ? 'bg-emerald-500 text-white' :
+                r.color === 'rose' ? 'bg-rose-500 text-white' :
+                (theme.dk ? 'bg-zinc-800 text-zinc-400' : 'bg-stone-100 text-stone-500')
+              }`}>{r.rank}</div>
+              <span className={`flex-1 font-bold ${theme.tx}`}>{r.c}</span>
+              {r.current && <span className="text-[8px] font-black uppercase px-1 py-0.5 rounded-full bg-rose-500 text-white">Vous</span>}
+              <span className={`font-black tabular-nums ${theme.tx}`}>CHF {r.t.toLocaleString('fr-CH')}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className={`absolute -bottom-3 -right-3 p-3 rounded-2xl border-2 shadow-xl ${theme.cd} ${theme.bd} flex items-center gap-2`}>
+        <div className="w-8 h-8 bg-indigo-500 rounded-xl text-white flex items-center justify-center">
+          <MessageCircle size={14} />
+        </div>
+        <div className="text-xs">
+          <p className="font-black">Coach IA</p>
+          <p className={`text-[9px] ${theme.mt}`}>Connaît votre canton</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TrustBand({ theme }) {
+  const items = [
+    { icon: Shield, label: 'TVA 8.1% conforme' },
+    { icon: MapPin, label: '26 cantons calibrés' },
+    { icon: FileSignature, label: 'QR-bill 2022 conforme' },
+    { icon: Building2, label: 'Données hébergées CH' },
+    { icon: Coins, label: 'AVS / LPP exacts 2025' },
+  ];
+  return (
+    <section className={`border-y ${theme.bd} ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'} py-6`}>
+      <div className="max-w-6xl mx-auto px-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        {items.map((it) => {
+          const Ic = it.icon;
+          return (
+            <div key={it.label} className={`flex items-center gap-1.5 text-xs font-bold ${theme.mt}`}>
+              <Ic size={14} className="text-emerald-500" /> {it.label}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function Problem({ theme }) {
+  const probs = [
+    { icon: Receipt, title: 'Excel + Word + Dropbox = chaos', body: 'Vous jonglez avec 5 outils pour vos factures, charges, déclaration. Une erreur de TVA = 3-5× le manque en redressement.' },
+    { icon: Building2, title: 'Bexio fait trop, mal, cher', body: '39 CHF/mois pour des fonctions que vous n\'utilisez pas. Aucun coaching. Aucune comparaison cantonale. Pas de conseil sur votre situation.' },
+    { icon: MessageCircle, title: 'Aucun outil ne connaît la Suisse', body: 'Comparis fait des simulations, pas de gestion. Excel ne connaît pas votre canton. ChatGPT donne des conseils américains.' },
+  ];
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16 md:py-20">
+      <div className="text-center mb-12">
+        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Le constat</p>
+        <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
+          Gérer ses finances en Suisse en 2025, c'est galère.
+        </h2>
+      </div>
+      <div className="grid md:grid-cols-3 gap-5">
+        {probs.map((p) => {
+          const Ic = p.icon;
+          return (
+            <div key={p.title} className={`p-5 rounded-2xl border ${theme.cd} ${theme.bd}`}>
+              <div className="w-10 h-10 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mb-3">
+                <Ic size={20} />
+              </div>
+              <h3 className={`font-black text-base mb-2 ${theme.tx}`}>{p.title}</h3>
+              <p className={`text-xs leading-relaxed ${theme.mt}`}>{p.body}</p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function Features({ theme }) {
+  const feats = [
+    {
+      icon: Sparkles, color: 'emerald',
+      title: 'Onboarding personnalisé par canton',
+      body: 'Canton, permis (B/C/G/frontalier), situation famille, prévoyance. Tous les calculs sont ensuite calibrés pour vous — pas de moyenne mondiale.',
+    },
+    {
+      icon: GraduationCap, color: 'amber',
+      title: '66 leçons sur la fiscalité suisse',
+      body: 'Cantons, frontaliers FR/DE/IT/AT, immobilier + LPP, comparatif 3A (Viac/Frankly/Finpension), création Sàrl, TVA TDFN vs effective. Quiz + XP.',
+    },
+    {
+      icon: Camera, color: 'indigo',
+      title: 'Scanner factures Claude Vision',
+      body: 'Photo d\'un reçu Migros, Caffè ou restaurant → l\'IA extrait montant, date, TVA, fournisseur, catégorie. JPG, PNG ou PDF. Vous éditez si besoin.',
+    },
+    {
+      icon: FileSignature, color: 'rose',
+      title: 'QR-factures suisses conformes',
+      body: 'Obligatoire depuis 30 sept 2022. Génération PDF en 1 clic avec QR scannable par toutes les banques suisses. Inclus dans Pro Premium (Bexio: 39 CHF/mois).',
+    },
+    {
+      icon: MapPin, color: 'rose',
+      title: 'Simulateur 26 cantons',
+      body: '"Déménager à Zoug me ferait gagner combien ?" — réponse en 3 secondes. Inclut écarts d\'impôts ET de LAMal.',
+    },
+    {
+      icon: MessageCircle, color: 'indigo',
+      title: 'Coach IA contextuel',
+      body: 'Sait que vous êtes 35 ans, marié, à Vaud, sans 3A, avec 1\'100 CHF de capacité mensuelle. Vous dit quoi faire CETTE semaine, pas des généralités.',
+    },
+  ];
+  return (
+    <section id="features" className={`py-16 md:py-20 ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'}`}>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Ce qu'il y a dedans</p>
+          <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
+            6 features qui transforment la gestion de vos finances suisses.
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {feats.map((f) => {
+            const Ic = f.icon;
+            return (
+              <div key={f.title} className={`p-5 rounded-2xl border ${theme.cd} ${theme.bd}`}>
+                <div className={`w-10 h-10 bg-${f.color}-500/10 text-${f.color}-500 rounded-2xl flex items-center justify-center mb-3`}>
+                  <Ic size={20} />
+                </div>
+                <h3 className={`font-black text-sm mb-2 ${theme.tx}`}>{f.title}</h3>
+                <p className={`text-xs leading-relaxed ${theme.mt}`}>{f.body}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Comparison({ theme }) {
+  const rows = [
+    { feat: 'Coach IA personnalisé par canton', fb: true, bexio: false, excel: false },
+    { feat: 'Académie complète (66 leçons)', fb: true, bexio: false, excel: false },
+    { feat: 'Scanner factures IA', fb: true, bexio: 'partial', excel: false },
+    { feat: 'QR-factures conformes', fb: true, bexio: true, excel: false },
+    { feat: 'Simulateur 26 cantons', fb: true, bexio: false, excel: false },
+    { feat: 'Décomposition brut → net', fb: true, bexio: false, excel: 'partial' },
+    { feat: 'Conforme TVA 2025', fb: true, bexio: true, excel: false },
+    { feat: 'Prix mensuel', fb: '9-29 CHF', bexio: '39-99 CHF', excel: 'Gratuit' },
+  ];
+  const cell = (v) => {
+    if (v === true) return <Check size={16} className="text-emerald-500 mx-auto" strokeWidth={3} />;
+    if (v === false) return <X size={16} className="text-stone-300 mx-auto" />;
+    if (v === 'partial') return <span className="text-[10px] font-bold text-amber-500">~</span>;
+    return <span className="text-[10px] font-bold">{v}</span>;
+  };
+  return (
+    <section className="max-w-5xl mx-auto px-4 py-16 md:py-20">
+      <div className="text-center mb-10">
+        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Comparaison</p>
+        <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>FatiaBill vs Bexio vs Excel.</h2>
+      </div>
+      <div className={`rounded-2xl border ${theme.cd} ${theme.bd} overflow-hidden`}>
+        <table className="w-full text-xs">
+          <thead className={`${theme.dk ? 'bg-zinc-800/50' : 'bg-stone-100'}`}>
+            <tr>
+              <th className={`text-left p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt}`}>Fonctionnalité</th>
+              <th className="p-3 font-black text-[10px] uppercase tracking-wider text-emerald-500 w-24">FatiaBill</th>
+              <th className={`p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt} w-24`}>Bexio</th>
+              <th className={`p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt} w-24`}>Excel</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} className={`border-t ${theme.bd}`}>
+                <td className={`p-3 ${theme.tx}`}>{r.feat}</td>
+                <td className="p-3 text-center">{cell(r.fb)}</td>
+                <td className="p-3 text-center">{cell(r.bexio)}</td>
+                <td className="p-3 text-center">{cell(r.excel)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function Pricing({ theme, onSignUp }) {
+  const plans = [
+    {
+      name: 'Gratuit', price: '0', period: 'CHF', accent: 'stone',
+      tagline: 'Pour goûter',
+      features: ['Dashboard budget', '5 charges fixes · 2 objectifs', '3 messages IA / mois', 'Académie de base (~30%)', 'Simulateur cantons'],
+      cta: 'Commencer gratuit',
+    },
+    {
+      name: 'Privé Premium', price: '9', period: 'CHF/mois', accent: 'emerald', highlighted: true,
+      tagline: 'Pour un particulier',
+      features: ['Tout du Gratuit, illimité', 'Académie complète (40 leçons)', 'Coach IA contextuel illimité', 'Décomposition brut → net', 'Comparateur 3A', 'Annulable à tout moment'],
+      cta: 'Essai 14 jours',
+    },
+    {
+      name: 'Pro Premium', price: '29', period: 'CHF/mois', accent: 'indigo',
+      tagline: 'Indépendant·e / Sàrl',
+      features: ['Tout du Privé', 'Scanner factures IA', 'QR-factures conformes', 'Académie Pro (26 modules)', 'Rapport fiscal annuel', 'Coach business IA'],
+      cta: 'Essai 14 jours',
+    },
+  ];
+  return (
+    <section className={`py-16 md:py-20 ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'}`}>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-10">
+          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Tarifs</p>
+          <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
+            Choisissez votre tranche.
+          </h2>
+          <p className={`text-sm mt-2 ${theme.mt}`}>14 jours d'essai gratuit sur les paliers payants · Sans carte bancaire</p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          {plans.map((p) => (
+            <div
+              key={p.name}
+              className={`p-6 rounded-3xl border-2 ${p.highlighted
+                ? `border-${p.accent}-500 ${theme.dk ? 'bg-emerald-950/30' : 'bg-emerald-50/50'} shadow-xl scale-[1.02]`
+                : `${theme.cd} ${theme.bd}`}`}
+            >
+              {p.highlighted && (
+                <div className={`inline-block px-2 py-0.5 mb-3 text-[9px] font-black uppercase tracking-wider rounded-full bg-${p.accent}-500 text-white`}>
+                  Recommandé
+                </div>
+              )}
+              <p className={`text-[10px] font-black uppercase tracking-wider ${theme.mt}`}>{p.tagline}</p>
+              <h3 className={`text-xl font-black mt-1 ${theme.tx}`}>{p.name}</h3>
+              <div className="flex items-baseline gap-1 mt-2 mb-4">
+                <span className={`text-4xl font-black tabular-nums ${theme.tx}`}>{p.price}</span>
+                <span className={`text-xs font-bold ${theme.mt}`}>{p.period}</span>
+              </div>
+              <ul className="space-y-2 mb-5">
+                {p.features.map((f, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs">
+                    <Check size={13} className={`text-${p.accent}-500 mt-0.5 flex-shrink-0`} />
+                    <span className={theme.tx}>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={onSignUp}
+                className={`w-full py-3 rounded-2xl text-xs font-black flex items-center justify-center gap-1.5 transition-colors ${p.highlighted
+                  ? `bg-${p.accent}-600 hover:bg-${p.accent}-500 text-white`
+                  : `${theme.sf} ${theme.tx} ${theme.hv}`}`}
+              >
+                {p.cta} <ArrowRight size={13} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FAQ({ theme }) {
+  const qs = [
+    {
+      q: 'Pourquoi 14 jours d\'essai gratuit ?',
+      a: 'Parce qu\'on est confiants : si en 14 jours vous n\'avez pas vu de différence dans votre gestion, vous n\'aurez pas envie de payer. Et c\'est OK.',
+    },
+    {
+      q: 'Faut-il une carte bancaire pour l\'essai ?',
+      a: 'Non. Vous tapez email + mot de passe, vous remplissez votre profil (canton, situation), et vous démarrez. La carte n\'arrive que si vous décidez de passer Premium après les 14 jours.',
+    },
+    {
+      q: 'Où sont mes données ?',
+      a: 'Hébergées en Europe (Supabase EU), conformes RGPD/LPD. Aucune revente, aucun partage. Vos scans IA passent par Anthropic (Claude) pour analyse OCR — pas de rétention. Vous pouvez supprimer votre compte à tout moment.',
+    },
+    {
+      q: 'En quoi êtes-vous différents de Bexio ?',
+      a: 'Bexio fait de la comptabilité pour comptables. FatiaBill fait de la gestion financière pour humains. On est moins exhaustifs sur les modules avancés (compta multi-monnaies, salaires complexes), mais beaucoup mieux sur le coaching, la simulation cantonale, le scanner et l\'académie. Et 3-4× moins cher.',
+    },
+    {
+      q: 'Puis-je annuler à tout moment ?',
+      a: 'Oui, depuis votre dashboard ou Stripe. Vous gardez l\'accès jusqu\'à la fin du mois payé, puis vous repassez en plan Gratuit avec accès à vos données historiques.',
+    },
+    {
+      q: 'Pour qui FatiaBill n\'est PAS fait ?',
+      a: 'Pas pour une PME de 50+ employés avec besoins compta avancés (allez sur Bexio ou Abacus). Pas pour quelqu\'un qui veut JUSTE émettre 2 factures par an (Excel suffit). Pour le reste — particulier qui veut comprendre ses finances suisses, indépendant·e ou petite Sàrl qui veut un outil utile sans 39 CHF/mois — c\'est exactement ça.',
+    },
+  ];
+  return (
+    <section className="max-w-3xl mx-auto px-4 py-16 md:py-20">
+      <div className="text-center mb-10">
+        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">FAQ</p>
+        <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>Questions fréquentes.</h2>
+      </div>
+      <div className="space-y-3">
+        {qs.map((q, i) => (
+          <details key={i} className={`p-4 rounded-2xl border group ${theme.cd} ${theme.bd}`}>
+            <summary className={`font-black text-sm cursor-pointer flex items-center justify-between gap-3 ${theme.tx}`}>
+              <span>{q.q}</span>
+              <ChevronRight size={16} className={`${theme.mt} group-open:rotate-90 transition-transform flex-shrink-0`} />
+            </summary>
+            <p className={`text-xs mt-3 leading-relaxed ${theme.mt}`}>{q.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Footer({ theme }) {
+  return (
+    <footer className={`border-t py-8 ${theme.bd}`}>
+      <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="font-black italic tracking-tighter">
+            FatiaBill<span className="text-emerald-500">.</span>
+          </span>
+          <span className={`text-[10px] ${theme.mt}`}>· Conçu en Suisse 🇨🇭</span>
+        </div>
+        <div className={`flex items-center gap-4 text-[10px] font-bold ${theme.mt}`}>
+          <a href="mailto:contact@fatiabill.ch" className="hover:text-emerald-500 transition-colors">contact@fatiabill.ch</a>
+          <span>·</span>
+          <span>© {new Date().getFullYear()} FatiaBill</span>
+        </div>
+      </div>
+    </footer>
+  );
+}

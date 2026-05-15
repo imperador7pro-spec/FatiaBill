@@ -12,6 +12,7 @@ import {
 import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
+import { Landing } from './landing.jsx';
 import { OnboardingWizard } from './onboarding.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import { PrivateDashboard } from './views/PrivateDashboard.jsx';
@@ -90,6 +91,7 @@ export default function App() {
   const [editingGoalIdx, setEditingGoalIdx] = useState(null);
   const [goalInitial, setGoalInitial] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [authView, setAuthView] = useState(null); // null = landing, 'login' or 'signup' = AuthScreen
   const expensesPrivSnapshot = useRef(null);
   const expensesProSnapshot = useRef(null);
 
@@ -542,7 +544,28 @@ export default function App() {
   };
 
   if (authLoading) return <AuthLoadingScreen />;
-  if (!user) return <AuthScreen theme={theme} onSignIn={handleSignIn} onSignUp={handleSignUp} />;
+  if (!user) {
+    if (authView) {
+      return (
+        <AuthScreen
+          theme={theme}
+          initialView={authView}
+          onSignIn={handleSignIn}
+          onSignUp={handleSignUp}
+          onBack={() => setAuthView(null)}
+        />
+      );
+    }
+    return (
+      <Landing
+        theme={theme}
+        darkMode={darkMode}
+        onToggleDark={() => setDarkMode(!darkMode)}
+        onSignIn={() => setAuthView('login')}
+        onSignUp={() => setAuthView('signup')}
+      />
+    );
+  }
   if (!onboardingDone) {
     return (
       <OnboardingWizard
