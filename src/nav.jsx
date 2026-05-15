@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Zap, Landmark, Flame, Crown, Sun, Moon, LogOut, Sparkles, AlertCircle,
-  CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin, Coins,
+  CheckSquare, Target, GraduationCap, MessageCircle, Settings, MapPin, Coins, LifeBuoy,
   LayoutDashboard, Receipt, Camera, FileSignature, FileText, BookOpen,
 } from 'lucide-react';
 
@@ -97,6 +97,7 @@ const NAV_PRIVATE = [
   { key: 'tax_sim', icon: MapPin, special: true },
   { key: 'academy', icon: GraduationCap, special: true },
   { key: 'ai', icon: MessageCircle, special: true },
+  { key: 'sos_poursuite', icon: LifeBuoy, special: true },
   { key: 'setup', icon: Settings },
 ];
 
@@ -109,6 +110,7 @@ const NAV_PRO = [
   { key: 'tax_sim', icon: MapPin, special: true },
   { key: 'ai_pro', icon: MessageCircle, special: true },
   { key: 'academy_pro', icon: BookOpen },
+  { key: 'sos_poursuite', icon: LifeBuoy, special: true },
   { key: 'setup', icon: Settings },
 ];
 

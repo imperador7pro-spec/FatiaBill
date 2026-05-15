@@ -34,6 +34,7 @@ const SalaryBreakdown = lazy(() => import('./views/SalaryBreakdown.jsx').then((m
 const TaxReport = lazy(() => import('./views/TaxReport.jsx').then((m) => named(m, 'TaxReport')));
 const GuidePro = lazy(() => import('./views/GuidePro.jsx').then((m) => named(m, 'GuidePro')));
 const Setup = lazy(() => import('./views/Setup.jsx').then((m) => named(m, 'Setup')));
+const Poursuites = lazy(() => import('./views/Poursuites.jsx').then((m) => named(m, 'Poursuites')));
 
 function ViewLoading() {
   return (
@@ -722,6 +723,10 @@ export default function App() {
 
         {view === 'salary_breakdown' && (
           <SalaryBreakdown theme={theme} profile={profile} />
+        )}
+
+        {view === 'sos_poursuite' && (
+          <Poursuites theme={theme} mode={mode} />
         )}
 
         {view === 'setup' && (
