@@ -12,6 +12,7 @@ export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
       <Hero theme={theme} onSignUp={onSignUp} />
       <TrustBand theme={theme} />
       <Principles theme={theme} />
+      <AppPreview theme={theme} />
       <HowItWorks theme={theme} onSignUp={onSignUp} />
       <Features theme={theme} />
       <Pricing theme={theme} onSignUp={onSignUp} />
@@ -236,6 +237,105 @@ function Principles({ theme }) {
   );
 }
 
+function AppPreview({ theme }) {
+  const lines = [
+    { label: 'AVS / AI / APG', sub: '5.3% — sans plafond', amount: -3816, neg: true },
+    { label: 'AC chômage', sub: '1.1% jusqu\'à 148\'200', amount: -792, neg: true },
+    { label: 'LAA non-pro', sub: '~1.0% accident hors travail', amount: -720, neg: true },
+    { label: 'LPP 2ème pilier', sub: 'Selon âge (35 ans) · part employé', amount: -2277, neg: true },
+    { label: 'Impôts', sub: 'Vaud · taux effectif 16.4%', amount: -10560, neg: true },
+    { label: 'LAMal', sub: 'Prime moyenne VD · franchise 300', amount: -4920, neg: true },
+  ];
+
+  return (
+    <section className={`py-16 md:py-20 ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'}`}>
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="text-center mb-10">
+          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Aperçu</p>
+          <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
+            Là où va chaque CHF de votre salaire.
+          </h2>
+          <p className={`text-sm mt-3 max-w-xl mx-auto ${theme.mt}`}>
+            Bien plus qu'un budget : la vraie décomposition de votre fiche de paie, ligne par ligne.
+          </p>
+        </div>
+
+        <div className="max-w-2xl mx-auto" style={{ animation: 'fade-up 0.7s ease-out both' }}>
+          <div className={`rounded-3xl border-2 overflow-hidden shadow-2xl ${theme.cd} ${theme.bd}`}>
+            <div className={`flex items-center gap-2 px-4 py-3 border-b ${theme.bd} ${theme.dk ? 'bg-zinc-900' : 'bg-stone-100'}`}>
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              </div>
+              <div className={`flex-1 mx-3 px-3 py-1 rounded-md text-[10px] font-mono ${theme.dk ? 'bg-zinc-800 text-zinc-400' : 'bg-white text-stone-500'}`}>
+                fatiabill.ch / brut-net
+              </div>
+              <Coins size={14} className={`text-emerald-500`} style={{ animation: 'sparkle-pulse 2.4s ease-in-out infinite' }} />
+            </div>
+
+            <div className={`p-5 ${theme.dk ? 'bg-zinc-950' : 'bg-white'}`}>
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${theme.dk ? 'from-emerald-950/40 to-zinc-900' : 'from-emerald-50 to-white'} border ${theme.bd} mb-3`}>
+                <p className={`text-[9px] font-black uppercase tracking-wider ${theme.mt}`}>Salaire brut annuel</p>
+                <p className={`text-2xl font-black tabular-nums ${theme.tx}`}>
+                  CHF <AnimatedNumber target={72000} duration={1200} /> <span className="text-xs text-stone-500">/ an</span>
+                </p>
+                <p className={`text-[10px] ${theme.mt}`}>≈ 6'000 CHF/mois · Vaud · 35 ans · célibataire</p>
+              </div>
+
+              <div className="space-y-1">
+                {lines.map((l, i) => (
+                  <div
+                    key={l.label}
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs ${theme.dk ? 'bg-zinc-900' : 'bg-stone-50'}`}
+                    style={{
+                      animation: 'slide-in-left 0.5s ease-out both',
+                      animationDelay: `${0.35 + i * 0.12}s`,
+                    }}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className={`font-bold text-[11px] ${theme.tx} truncate`}>{l.label}</p>
+                        <p className={`text-[9px] ${theme.mt} truncate`}>{l.sub}</p>
+                      </div>
+                    </div>
+                    <p className="font-black text-[11px] tabular-nums text-rose-500 whitespace-nowrap">
+                      −{Math.abs(l.amount).toLocaleString('fr-CH')}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className={`mt-3 p-4 rounded-2xl bg-gradient-to-br ${theme.dk ? 'from-emerald-900/30 to-emerald-950/30' : 'from-emerald-50 to-emerald-100/50'} border-2 border-emerald-500/30`}
+                style={{ animation: 'fade-up 0.7s ease-out 1.4s both' }}
+              >
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <p className={`text-[9px] font-black uppercase tracking-wider ${theme.dk ? 'text-emerald-300' : 'text-emerald-700'}`}>Net en main réel</p>
+                    <p className={`text-2xl font-black tabular-nums ${theme.tx}`}>
+                      CHF <AnimatedNumber target={48915} duration={1400} /> <span className="text-xs text-stone-500">/ an</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-[9px] font-black uppercase tracking-wider ${theme.mt}`}>Take-home</p>
+                    <p className={`text-xl font-black ${theme.dk ? 'text-emerald-300' : 'text-emerald-700'} tabular-nums`}>68%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className={`text-center text-[10px] mt-4 ${theme.mt} italic`}>
+          Exemple Vaud · 6'000 CHF brut/mois · 35 ans · sans 3A. Vos chiffres dépendent de votre profil exact.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function HowItWorks({ theme, onSignUp }) {
   const steps = [
     {
@@ -244,13 +344,6 @@ function HowItWorks({ theme, onSignUp }) {
       title: 'Créez votre compte',
       duration: '30 secondes',
       body: 'Email + mot de passe. Aucune carte bancaire requise.',
-    },
-    {
-      n: 2,
-      icon: MapPin,
-      title: 'Profil par canton',
-      duration: 'Wizard 4 étapes',
-      body: 'Canton, permis, situation famille, prévoyance. Tout sera calibré pour vous.',
     },
     {
       n: 3,
