@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { auth, db } from './supabase.js';
 import {
   DEFAULT_EXPENSES_PRIVATE,
@@ -13,24 +13,35 @@ import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
 import { Landing } from './landing.jsx';
-import { OnboardingWizard } from './onboarding.jsx';
 import { TopNav, TabBar } from './nav.jsx';
-import { PrivateDashboard } from './views/PrivateDashboard.jsx';
-import { Savings } from './views/Savings.jsx';
-import { Academy } from './views/Academy.jsx';
-import { AICoach } from './views/AICoach.jsx';
-import { ProDashboard } from './views/ProDashboard.jsx';
-import { Transactions } from './views/Transactions.jsx';
-import { Scanner } from './views/Scanner.jsx';
-import { Invoices } from './views/Invoices.jsx';
-import { TaxSimulator } from './views/TaxSimulator.jsx';
-import { SalaryBreakdown } from './views/SalaryBreakdown.jsx';
-import { TaxReport } from './views/TaxReport.jsx';
-import { GuidePro } from './views/GuidePro.jsx';
-import { Setup } from './views/Setup.jsx';
 import {
   ModalShell, SalaryModal, TransactionModal, GoalModal, LessonModal, UpgradeModal,
 } from './modals.jsx';
+
+// Lazy-loaded chunks — pulled in on first navigation/use
+const named = (mod, name) => ({ default: mod[name] });
+const OnboardingWizard = lazy(() => import('./onboarding.jsx').then((m) => named(m, 'OnboardingWizard')));
+const PrivateDashboard = lazy(() => import('./views/PrivateDashboard.jsx').then((m) => named(m, 'PrivateDashboard')));
+const Savings = lazy(() => import('./views/Savings.jsx').then((m) => named(m, 'Savings')));
+const Academy = lazy(() => import('./views/Academy.jsx').then((m) => named(m, 'Academy')));
+const AICoach = lazy(() => import('./views/AICoach.jsx').then((m) => named(m, 'AICoach')));
+const ProDashboard = lazy(() => import('./views/ProDashboard.jsx').then((m) => named(m, 'ProDashboard')));
+const Transactions = lazy(() => import('./views/Transactions.jsx').then((m) => named(m, 'Transactions')));
+const Scanner = lazy(() => import('./views/Scanner.jsx').then((m) => named(m, 'Scanner')));
+const Invoices = lazy(() => import('./views/Invoices.jsx').then((m) => named(m, 'Invoices')));
+const TaxSimulator = lazy(() => import('./views/TaxSimulator.jsx').then((m) => named(m, 'TaxSimulator')));
+const SalaryBreakdown = lazy(() => import('./views/SalaryBreakdown.jsx').then((m) => named(m, 'SalaryBreakdown')));
+const TaxReport = lazy(() => import('./views/TaxReport.jsx').then((m) => named(m, 'TaxReport')));
+const GuidePro = lazy(() => import('./views/GuidePro.jsx').then((m) => named(m, 'GuidePro')));
+const Setup = lazy(() => import('./views/Setup.jsx').then((m) => named(m, 'Setup')));
+
+function ViewLoading() {
+  return (
+    <div className="flex items-center justify-center py-16">
+      <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function expensesEqual(a, b) {
   return a.id === b.id
@@ -568,15 +579,17 @@ export default function App() {
   }
   if (!onboardingDone) {
     return (
-      <OnboardingWizard
-        theme={theme}
-        user={user}
-        darkMode={darkMode}
-        onToggleDark={() => setDarkMode(!darkMode)}
-        existingProfile={profile}
-        onComplete={handleOnboardingComplete}
-        onSignOut={handleSignOut}
-      />
+      <Suspense fallback={<AuthLoadingScreen />}>
+        <OnboardingWizard
+          theme={theme}
+          user={user}
+          darkMode={darkMode}
+          onToggleDark={() => setDarkMode(!darkMode)}
+          existingProfile={profile}
+          onComplete={handleOnboardingComplete}
+          onSignOut={handleSignOut}
+        />
+      </Suspense>
     );
   }
 
@@ -597,6 +610,7 @@ export default function App() {
       <main className="max-w-4xl mx-auto p-4 space-y-5">
         <TabBar theme={theme} mode={mode} view={view} onChangeView={setView} />
 
+        <Suspense fallback={<ViewLoading />}>
         {mode === 'private' && view === 'dashboard' && (
           <PrivateDashboard
             theme={theme}
@@ -720,6 +734,7 @@ export default function App() {
             onSaveProfile={saveProfileFields}
           />
         )}
+        </Suspense>
       </main>
 
       <ModalShell theme={theme} modal={modal} onClose={() => setModal(null)}>
