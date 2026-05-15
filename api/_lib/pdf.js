@@ -216,7 +216,7 @@ export async function buildInvoicePdf(payload) {
   // QR-BILL (auto positioned at bottom)
   // ═══════════════════════════════════════════════
 
-  const qrBill = new SwissQRBill(qrData);
+  const qrBill = new SwissQRBill(qrData, { language: 'FR' });
   qrBill.attachTo(pdf);
 
   // ═══════════════════════════════════════════════
