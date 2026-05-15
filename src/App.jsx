@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { auth, db } from './supabase.js';
 import {
   DEFAULT_EXPENSES_PRIVATE,
@@ -30,6 +30,27 @@ import { Setup } from './views/Setup.jsx';
 import {
   ModalShell, SalaryModal, TransactionModal, GoalModal, LessonModal, UpgradeModal,
 } from './modals.jsx';
+
+function expensesEqual(a, b) {
+  return a.id === b.id
+    && a.label === b.label
+    && a.amount === b.amount
+    && a.category === b.category
+    && a.icon === b.icon;
+}
+
+function syncExpensesDelta(current, snapshot, userId, mode) {
+  if (!snapshot) return; // first load — nothing to sync
+  const oldMap = new Map(snapshot.map((e) => [e.id, e]));
+  const newMap = new Map(current.map((e) => [e.id, e]));
+  for (const [id] of oldMap) {
+    if (!newMap.has(id)) db.deleteExpense(id);
+  }
+  for (const e of current) {
+    const old = oldMap.get(e.id);
+    if (!old || !expensesEqual(old, e)) db.upsertExpense(e, userId, mode);
+  }
+}
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -68,6 +89,9 @@ export default function App() {
   const [activeLesson, setActiveLesson] = useState(null);
   const [editingGoalIdx, setEditingGoalIdx] = useState(null);
   const [goalInitial, setGoalInitial] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const expensesPrivSnapshot = useRef(null);
+  const expensesProSnapshot = useRef(null);
 
   const effPlan = effectivePlan(profile);
   const isPremium = isPremiumLike(effPlan);
@@ -92,12 +116,35 @@ export default function App() {
           setDarkMode(p.dark_mode || false);
           setOnboardingDone(!!p.onboarding_completed);
         }
-        const prog = await db.getProgress(u.id);
+        const [prog, expPriv, expPro, txs, gls, docs] = await Promise.all([
+          db.getProgress(u.id),
+          db.getExpenses(u.id, 'private'),
+          db.getExpenses(u.id, 'pro'),
+          db.getTransactions(u.id),
+          db.getGoals(u.id),
+          db.getDocuments(u.id),
+        ]);
         if (prog) {
           setCompletedLessons(prog.completed_lessons || []);
           setXp(prog.xp || 0);
           setStreak(prog.streak || 0);
         }
+        const seedPriv = expPriv.length > 0
+          ? expPriv
+          : DEFAULT_EXPENSES_PRIVATE.map((e) => ({ ...e, id: db.newId() }));
+        const seedPro = expPro.length > 0
+          ? expPro
+          : DEFAULT_EXPENSES_PRO.map((e) => ({ ...e, id: db.newId() }));
+        setExpensesPrivate(seedPriv);
+        setExpensesPro(seedPro);
+        expensesPrivSnapshot.current = seedPriv;
+        expensesProSnapshot.current = seedPro;
+        if (expPriv.length === 0) seedPriv.forEach((e) => db.upsertExpense(e, u.id, 'private'));
+        if (expPro.length === 0) seedPro.forEach((e) => db.upsertExpense(e, u.id, 'pro'));
+        setTransactions(txs);
+        setGoals(gls);
+        setDocuments(docs);
+        setDataLoaded(true);
       }
       setAuthLoading(false);
     };
@@ -110,6 +157,14 @@ export default function App() {
         setPlan('free');
         setProfile(null);
         setOnboardingDone(false);
+        setDataLoaded(false);
+        setTransactions([]);
+        setGoals([]);
+        setDocuments([]);
+        setExpensesPrivate(DEFAULT_EXPENSES_PRIVATE);
+        setExpensesPro(DEFAULT_EXPENSES_PRO);
+        expensesPrivSnapshot.current = null;
+        expensesProSnapshot.current = null;
       }
     });
 
@@ -132,6 +187,25 @@ export default function App() {
     () => computeFinance({ mode, salary, expenses, transactions }),
     [mode, salary, expenses, transactions],
   );
+
+  // Debounced persistence for expenses (label/amount edits trigger many setState calls).
+  useEffect(() => {
+    if (!user || !dataLoaded) return;
+    const t = setTimeout(() => {
+      syncExpensesDelta(expensesPrivate, expensesPrivSnapshot.current, user.id, 'private');
+      expensesPrivSnapshot.current = expensesPrivate;
+    }, 600);
+    return () => clearTimeout(t);
+  }, [expensesPrivate, user, dataLoaded]);
+
+  useEffect(() => {
+    if (!user || !dataLoaded) return;
+    const t = setTimeout(() => {
+      syncExpensesDelta(expensesPro, expensesProSnapshot.current, user.id, 'pro');
+      expensesProSnapshot.current = expensesPro;
+    }, 600);
+    return () => clearTimeout(t);
+  }, [expensesPro, user, dataLoaded]);
 
   const goalProjection = useCallback(
     (g) => computeGoalProjection(g, finance.monthlyCapacity),
@@ -285,22 +359,28 @@ export default function App() {
 
   const saveTransaction = (form) => {
     const tx = {
-      id: Date.now().toString(),
+      id: db.newId(),
       ...form,
-      date: new Date().toISOString().split('T')[0],
+      amount: Number(form.amount) || 0,
+      date: form.date || new Date().toISOString().split('T')[0],
     };
     setTransactions([tx, ...transactions]);
     setModal(null);
+    if (user) db.upsertTransaction(tx, user.id);
   };
 
   const toggleTransactionStatus = (id) => {
-    setTransactions(transactions.map((t) =>
+    const updated = transactions.map((t) =>
       t.id === id ? { ...t, status: t.status === 'PAID' ? 'PENDING' : 'PAID' } : t,
-    ));
+    );
+    setTransactions(updated);
+    const changed = updated.find((t) => t.id === id);
+    if (user && changed) db.upsertTransaction(changed, user.id);
   };
 
   const deleteTransaction = (id) => {
     setTransactions(transactions.filter((t) => t.id !== id));
+    if (user) db.deleteTransaction(id);
   };
 
   const openAddGoal = () => {
@@ -322,24 +402,32 @@ export default function App() {
 
   const saveGoal = (form) => {
     const preset = GOAL_PRESETS.find((p) => p.l === form.l);
-    const goal = {
-      id: Date.now().toString(),
+    const baseGoal = {
       l: form.cl || form.l,
       i: preset?.i || 'Target',
       t: parseFloat(form.t) || 10000,
       s: parseFloat(form.s) || 0,
       m: form.m ? parseFloat(form.m) : '',
     };
+    let saved;
     if (editingGoalIdx !== null) {
-      setGoals(goals.map((x, i) => (i === editingGoalIdx ? { ...x, ...goal, id: x.id } : x)));
+      const existing = goals[editingGoalIdx];
+      saved = { ...existing, ...baseGoal };
+      setGoals(goals.map((x, i) => (i === editingGoalIdx ? saved : x)));
       setEditingGoalIdx(null);
     } else {
-      setGoals([...goals, goal]);
+      saved = { id: db.newId(), ...baseGoal };
+      setGoals([...goals, saved]);
     }
     setModal(null);
+    if (user && saved) db.upsertGoal(saved, user.id);
   };
 
-  const deleteGoal = (idx) => setGoals(goals.filter((_, i) => i !== idx));
+  const deleteGoal = (idx) => {
+    const removed = goals[idx];
+    setGoals(goals.filter((_, i) => i !== idx));
+    if (user && removed) db.deleteGoal(removed.id);
+  };
 
   const runScan = async (imageDataUrl) => {
     if (!imageDataUrl) return;
@@ -383,7 +471,7 @@ export default function App() {
     if (!scanResult) return;
     const today = new Date().toISOString().split('T')[0];
     const doc = {
-      id: Date.now().toString(),
+      id: db.newId(),
       label: scanResult.label || scanResult.vendor || 'Document scanné',
       amount: scanResult.amount || 0,
       date: scanResult.date || today,
@@ -393,19 +481,19 @@ export default function App() {
       type,
     };
     setDocuments([doc, ...documents]);
+    if (user) db.insertDocument(doc, user.id);
     if (type !== 'JUSTIFICATIF') {
-      setTransactions([
-        {
-          id: (Date.now() + 1).toString(),
-          type: type === 'CLIENT' ? 'IN' : 'OUT',
-          amount: doc.amount,
-          label: doc.label,
-          date: doc.date,
-          status: 'PAID',
-          cat: type === 'FOURNISSEUR' ? doc.category : null,
-        },
-        ...transactions,
-      ]);
+      const tx = {
+        id: db.newId(),
+        type: type === 'CLIENT' ? 'IN' : 'OUT',
+        amount: doc.amount,
+        label: doc.label,
+        date: doc.date,
+        status: 'PAID',
+        cat: type === 'FOURNISSEUR' ? doc.category : null,
+      };
+      setTransactions([tx, ...transactions]);
+      if (user) db.upsertTransaction(tx, user.id);
     }
     setScanResult(null);
     setScanError(null);
