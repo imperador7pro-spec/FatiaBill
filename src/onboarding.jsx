@@ -7,6 +7,7 @@ import {
   CANTONS, NATIONALITY_OPTIONS, CIVIL_STATUS_OPTIONS,
   EMPLOYMENT_STATUS_OPTIONS, BUSINESS_FORM_OPTIONS, BUSINESS_SECTORS, LAMAL_FRANCHISES,
 } from './data.js';
+import { Logo } from './logo.jsx';
 
 const currentYear = new Date().getFullYear();
 
@@ -212,10 +213,8 @@ export function OnboardingWizard({ theme, user, darkMode, onToggleDark, existing
     <div className={`min-h-screen ${theme.bg} flex flex-col`}>
       <header className="flex items-center justify-between p-4 max-w-2xl w-full mx-auto">
         <div>
-          <h1 className={`text-2xl font-black italic tracking-tighter ${theme.tx}`}>
-            FatiaBill<span className="text-emerald-500">.</span>
-          </h1>
-          <p className={`text-[10px] font-bold ${theme.mt} uppercase tracking-wider`}>Bienvenue</p>
+          <Logo size="lg" />
+          <p className={`text-[10px] font-bold ${theme.mt} uppercase tracking-wider mt-1`}>Bienvenue</p>
         </div>
         <div className="flex items-center gap-2">
           <button
