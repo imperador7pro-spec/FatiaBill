@@ -276,6 +276,13 @@ export default function App() {
     if (user) db.updateProfile(user.id, { salary: amount, salary_source: source });
   };
 
+  const saveProfileFields = async (fields) => {
+    if (!user) return;
+    setProfile((prev) => ({ ...(prev || {}), ...fields }));
+    if (fields.mode && fields.mode !== mode) setMode(fields.mode);
+    await db.updateProfile(user.id, fields);
+  };
+
   const saveTransaction = (form) => {
     const tx = {
       id: Date.now().toString(),
@@ -584,7 +591,16 @@ export default function App() {
           <SalaryBreakdown theme={theme} profile={profile} />
         )}
 
-        {view === 'setup' && <Setup theme={theme} expenses={expenses} setExpenses={setExpenses} />}
+        {view === 'setup' && (
+          <Setup
+            theme={theme}
+            mode={mode}
+            profile={profile}
+            expenses={expenses}
+            setExpenses={setExpenses}
+            onSaveProfile={saveProfileFields}
+          />
+        )}
       </main>
 
       <ModalShell theme={theme} modal={modal} onClose={() => setModal(null)}>
