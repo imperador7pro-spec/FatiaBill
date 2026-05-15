@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Crown, Sparkles, Camera, FileSignature, MapPin, MessageCircle, GraduationCap,
-  Check, X, ArrowRight, Shield, Sun, Moon, Coins, Building2, Receipt,
-  Globe, Heart, Users, ChevronRight,
+  Check, ArrowRight, Shield, Sun, Moon, Coins, Building2, Receipt,
+  ChevronRight,
 } from 'lucide-react';
 
 export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
@@ -11,9 +11,8 @@ export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
       <TopBar theme={theme} darkMode={darkMode} onToggleDark={onToggleDark} onSignUp={onSignUp} onSignIn={onSignIn} />
       <Hero theme={theme} onSignUp={onSignUp} />
       <TrustBand theme={theme} />
-      <Problem theme={theme} />
+      <Principles theme={theme} />
       <Features theme={theme} />
-      <Comparison theme={theme} />
       <Pricing theme={theme} onSignUp={onSignUp} />
       <FAQ theme={theme} />
       <Footer theme={theme} />
@@ -50,9 +49,9 @@ function Hero({ theme, onSignUp }) {
   return (
     <section className="max-w-6xl mx-auto px-4 py-12 md:py-20">
       <div className="grid md:grid-cols-2 gap-12 items-center">
-        <div>
+        <div style={{ animation: 'fade-up 0.6s ease-out both' }}>
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-4 ${theme.dk ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
-            <Sparkles size={11} /> Conçu pour la Suisse 2025
+            <Sparkles size={11} /> Conçu pour la Suisse
           </div>
           <h1 className={`text-4xl md:text-5xl font-black tracking-tight leading-tight ${theme.tx}`}>
             Le copilote financier des Suisses qui en ont assez de{' '}
@@ -79,9 +78,32 @@ function Hero({ theme, onSignUp }) {
   );
 }
 
+function AnimatedNumber({ target, duration = 1400 }) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    let raf;
+    const tick = (now) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setN(Math.round(target * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return n.toLocaleString('fr-CH');
+}
+
 function HeroVisual({ theme }) {
+  const rows = [
+    { c: 'Zoug', t: 9000, rank: 1, color: 'emerald' },
+    { c: 'Schwyz', t: 10200, rank: 2, color: 'emerald' },
+    { c: 'Vaud', t: 17000, rank: 24, color: null },
+    { c: 'Genève', t: 17500, rank: 26, color: 'rose', current: true },
+  ];
   return (
-    <div className="relative">
+    <div className="relative" style={{ animation: 'fade-up 0.7s ease-out 0.15s both' }}>
       <div className={`p-5 rounded-3xl border-2 shadow-2xl ${theme.cd} ${theme.bd}`}>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center">
@@ -91,20 +113,29 @@ function HeroVisual({ theme }) {
             <p className={`text-[9px] font-black uppercase tracking-wider ${theme.mt}`}>Simulateur fiscal</p>
             <p className={`text-xs font-black ${theme.tx}`}>26 cantons comparés</p>
           </div>
+          <Sparkles
+            size={12}
+            className="ml-auto text-emerald-500"
+            style={{ animation: 'sparkle-pulse 2.4s ease-in-out infinite' }}
+          />
         </div>
-        <div className={`p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-3`}>
+        <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-3">
           <p className={`text-[9px] font-black uppercase ${theme.dk ? 'text-emerald-300' : 'text-emerald-700'}`}>Économie max possible</p>
-          <p className="text-2xl font-black tabular-nums">CHF 8'500 <span className="text-xs text-stone-500">/ an</span></p>
+          <p className="text-2xl font-black tabular-nums">
+            CHF <AnimatedNumber target={8500} /> <span className="text-xs text-stone-500">/ an</span>
+          </p>
           <p className={`text-[10px] ${theme.mt}`}>En déménageant de Genève à Zoug</p>
         </div>
         <div className="space-y-1.5">
-          {[
-            { c: 'Zoug', t: 9000, rank: 1, color: 'emerald' },
-            { c: 'Schwyz', t: 10200, rank: 2, color: 'emerald' },
-            { c: 'Vaud', t: 17000, rank: 24, color: null },
-            { c: 'Genève', t: 17500, rank: 26, color: 'rose', current: true },
-          ].map((r) => (
-            <div key={r.c} className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${r.current ? (theme.dk ? 'bg-rose-950/40' : 'bg-rose-50') : ''}`}>
+          {rows.map((r, i) => (
+            <div
+              key={r.c}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs ${r.current ? (theme.dk ? 'bg-rose-950/40' : 'bg-rose-50') : ''}`}
+              style={{
+                animation: 'slide-in-left 0.5s ease-out both',
+                animationDelay: `${0.3 + i * 0.12}s`,
+              }}
+            >
               <div className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-black ${
                 r.color === 'emerald' ? 'bg-emerald-500 text-white' :
                 r.color === 'rose' ? 'bg-rose-500 text-white' :
@@ -117,7 +148,10 @@ function HeroVisual({ theme }) {
           ))}
         </div>
       </div>
-      <div className={`absolute -bottom-3 -right-3 p-3 rounded-2xl border-2 shadow-xl ${theme.cd} ${theme.bd} flex items-center gap-2`}>
+      <div
+        className={`absolute -bottom-3 -right-3 p-3 rounded-2xl border-2 shadow-xl ${theme.cd} ${theme.bd} flex items-center gap-2`}
+        style={{ animation: 'float 3.2s ease-in-out infinite' }}
+      >
         <div className="w-8 h-8 bg-indigo-500 rounded-xl text-white flex items-center justify-center">
           <MessageCircle size={14} />
         </div>
@@ -134,9 +168,9 @@ function TrustBand({ theme }) {
   const items = [
     { icon: Shield, label: 'TVA 8.1% conforme' },
     { icon: MapPin, label: '26 cantons calibrés' },
-    { icon: FileSignature, label: 'QR-bill 2022 conforme' },
+    { icon: FileSignature, label: 'QR-bill conforme' },
     { icon: Building2, label: 'Données hébergées CH' },
-    { icon: Coins, label: 'AVS / LPP exacts 2025' },
+    { icon: Coins, label: 'AVS / LPP exacts' },
   ];
   return (
     <section className={`border-y ${theme.bd} ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'} py-6`}>
@@ -154,26 +188,41 @@ function TrustBand({ theme }) {
   );
 }
 
-function Problem({ theme }) {
-  const probs = [
-    { icon: Receipt, title: 'Excel + Word + Dropbox = chaos', body: 'Vous jonglez avec 5 outils pour vos factures, charges, déclaration. Une erreur de TVA = 3-5× le manque en redressement.' },
-    { icon: Building2, title: 'Bexio fait trop, mal, cher', body: '39 CHF/mois pour des fonctions que vous n\'utilisez pas. Aucun coaching. Aucune comparaison cantonale. Pas de conseil sur votre situation.' },
-    { icon: MessageCircle, title: 'Aucun outil ne connaît la Suisse', body: 'Comparis fait des simulations, pas de gestion. Excel ne connaît pas votre canton. ChatGPT donne des conseils américains.' },
+function Principles({ theme }) {
+  const pillars = [
+    {
+      icon: Sparkles,
+      title: 'Une seule app pour tout',
+      body: 'Budget, charges, factures, scans, simulation fiscale, coach. Plus besoin de jongler entre Excel, un dossier Dropbox et trois sites cantonaux.',
+    },
+    {
+      icon: MapPin,
+      title: 'Personnalisé pour vous',
+      body: 'Vos calculs s\'adaptent à votre canton, votre statut (suisse, permis B/C/G, frontalier), votre situation famille et votre prévoyance. Rien de générique.',
+    },
+    {
+      icon: MessageCircle,
+      title: 'Coach IA qui connaît la Suisse',
+      body: 'TVA, 3 piliers, 26 barèmes cantonaux, QR-bill, charges sociales — le coach maîtrise les règles 2025 ET votre profil. Conseil concret, pas du blabla.',
+    },
   ];
   return (
     <section className="max-w-6xl mx-auto px-4 py-16 md:py-20">
       <div className="text-center mb-12">
-        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Le constat</p>
+        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Notre approche</p>
         <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
-          Gérer ses finances en Suisse en 2025, c'est galère.
+          Trois principes qui changent tout.
         </h2>
+        <p className={`text-sm mt-3 max-w-2xl mx-auto ${theme.mt}`}>
+          Aucun outil suisse ne réunit aujourd'hui ces trois dimensions. C'est exactement ce qui rend FatiaBill différent.
+        </p>
       </div>
       <div className="grid md:grid-cols-3 gap-5">
-        {probs.map((p) => {
+        {pillars.map((p) => {
           const Ic = p.icon;
           return (
             <div key={p.title} className={`p-5 rounded-2xl border ${theme.cd} ${theme.bd}`}>
-              <div className="w-10 h-10 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center mb-3">
+              <div className="w-10 h-10 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-3">
                 <Ic size={20} />
               </div>
               <h3 className={`font-black text-base mb-2 ${theme.tx}`}>{p.title}</h3>
@@ -206,7 +255,7 @@ function Features({ theme }) {
     {
       icon: FileSignature, color: 'rose',
       title: 'QR-factures suisses conformes',
-      body: 'Obligatoire depuis 30 sept 2022. Génération PDF en 1 clic avec QR scannable par toutes les banques suisses. Inclus dans Pro Premium (Bexio: 39 CHF/mois).',
+      body: 'Obligatoire depuis 30 sept 2022. Génération PDF en 1 clic avec QR scannable par toutes les banques suisses.',
     },
     {
       icon: MapPin, color: 'rose',
@@ -223,16 +272,16 @@ function Features({ theme }) {
     <section id="features" className={`py-16 md:py-20 ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'}`}>
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Ce qu'il y a dedans</p>
+          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Tout ce qu'il y a dedans</p>
           <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
-            6 features qui transforment la gestion de vos finances suisses.
+            6 outils pensés pour la réalité suisse.
           </h2>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {feats.map((f) => {
             const Ic = f.icon;
             return (
-              <div key={f.title} className={`p-5 rounded-2xl border ${theme.cd} ${theme.bd}`}>
+              <div key={f.title} className={`p-5 rounded-2xl border ${theme.cd} ${theme.bd} transition-transform hover:-translate-y-1`}>
                 <div className={`w-10 h-10 bg-${f.color}-500/10 text-${f.color}-500 rounded-2xl flex items-center justify-center mb-3`}>
                   <Ic size={20} />
                 </div>
@@ -242,55 +291,6 @@ function Features({ theme }) {
             );
           })}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Comparison({ theme }) {
-  const rows = [
-    { feat: 'Coach IA personnalisé par canton', fb: true, bexio: false, excel: false },
-    { feat: 'Académie complète (66 leçons)', fb: true, bexio: false, excel: false },
-    { feat: 'Scanner factures IA', fb: true, bexio: 'partial', excel: false },
-    { feat: 'QR-factures conformes', fb: true, bexio: true, excel: false },
-    { feat: 'Simulateur 26 cantons', fb: true, bexio: false, excel: false },
-    { feat: 'Décomposition brut → net', fb: true, bexio: false, excel: 'partial' },
-    { feat: 'Conforme TVA 2025', fb: true, bexio: true, excel: false },
-    { feat: 'Prix mensuel', fb: '9-29 CHF', bexio: '39-99 CHF', excel: 'Gratuit' },
-  ];
-  const cell = (v) => {
-    if (v === true) return <Check size={16} className="text-emerald-500 mx-auto" strokeWidth={3} />;
-    if (v === false) return <X size={16} className="text-stone-300 mx-auto" />;
-    if (v === 'partial') return <span className="text-[10px] font-bold text-amber-500">~</span>;
-    return <span className="text-[10px] font-bold">{v}</span>;
-  };
-  return (
-    <section className="max-w-5xl mx-auto px-4 py-16 md:py-20">
-      <div className="text-center mb-10">
-        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Comparaison</p>
-        <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>FatiaBill vs Bexio vs Excel.</h2>
-      </div>
-      <div className={`rounded-2xl border ${theme.cd} ${theme.bd} overflow-hidden`}>
-        <table className="w-full text-xs">
-          <thead className={`${theme.dk ? 'bg-zinc-800/50' : 'bg-stone-100'}`}>
-            <tr>
-              <th className={`text-left p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt}`}>Fonctionnalité</th>
-              <th className="p-3 font-black text-[10px] uppercase tracking-wider text-emerald-500 w-24">FatiaBill</th>
-              <th className={`p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt} w-24`}>Bexio</th>
-              <th className={`p-3 font-black text-[10px] uppercase tracking-wider ${theme.mt} w-24`}>Excel</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i} className={`border-t ${theme.bd}`}>
-                <td className={`p-3 ${theme.tx}`}>{r.feat}</td>
-                <td className="p-3 text-center">{cell(r.fb)}</td>
-                <td className="p-3 text-center">{cell(r.bexio)}</td>
-                <td className="p-3 text-center">{cell(r.excel)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </section>
   );
@@ -331,7 +331,7 @@ function Pricing({ theme, onSignUp }) {
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`p-6 rounded-3xl border-2 ${p.highlighted
+              className={`p-6 rounded-3xl border-2 transition-transform hover:-translate-y-1 ${p.highlighted
                 ? `border-${p.accent}-500 ${theme.dk ? 'bg-emerald-950/30' : 'bg-emerald-50/50'} shadow-xl scale-[1.02]`
                 : `${theme.cd} ${theme.bd}`}`}
             >
@@ -385,16 +385,16 @@ function FAQ({ theme }) {
       a: 'Hébergées en Europe (Supabase EU), conformes RGPD/LPD. Aucune revente, aucun partage. Vos scans IA passent par Anthropic (Claude) pour analyse OCR — pas de rétention. Vous pouvez supprimer votre compte à tout moment.',
     },
     {
-      q: 'En quoi êtes-vous différents de Bexio ?',
-      a: 'Bexio fait de la comptabilité pour comptables. FatiaBill fait de la gestion financière pour humains. On est moins exhaustifs sur les modules avancés (compta multi-monnaies, salaires complexes), mais beaucoup mieux sur le coaching, la simulation cantonale, le scanner et l\'académie. Et 3-4× moins cher.',
+      q: 'Pour qui FatiaBill est-il fait ?',
+      a: 'Particuliers qui veulent maîtriser leur budget et leur fiscalité suisse, frontaliers, indépendant·es et petites Sàrl qui veulent un outil utile au quotidien — scan de factures, QR-bills, coach business — sans payer le prix d\'une suite comptable complète.',
     },
     {
       q: 'Puis-je annuler à tout moment ?',
       a: 'Oui, depuis votre dashboard ou Stripe. Vous gardez l\'accès jusqu\'à la fin du mois payé, puis vous repassez en plan Gratuit avec accès à vos données historiques.',
     },
     {
-      q: 'Pour qui FatiaBill n\'est PAS fait ?',
-      a: 'Pas pour une PME de 50+ employés avec besoins compta avancés (allez sur Bexio ou Abacus). Pas pour quelqu\'un qui veut JUSTE émettre 2 factures par an (Excel suffit). Pour le reste — particulier qui veut comprendre ses finances suisses, indépendant·e ou petite Sàrl qui veut un outil utile sans 39 CHF/mois — c\'est exactement ça.',
+      q: 'Pour qui FatiaBill n\'est-il PAS fait ?',
+      a: 'Pour une PME de 50+ employés avec besoins compta avancés (consolidation multi-sociétés, payroll complexe), il existe des suites dédiées plus adaptées. Pour quelqu\'un qui veut JUSTE émettre 2 factures par an, un simple outil gratuit suffit.',
     },
   ];
   return (
@@ -429,7 +429,7 @@ function Footer({ theme }) {
           <span className={`text-[10px] ${theme.mt}`}>· Conçu en Suisse 🇨🇭</span>
         </div>
         <div className={`flex items-center gap-4 text-[10px] font-bold ${theme.mt}`}>
-          <a href="mailto:contact@fatiabill.ch" className="hover:text-emerald-500 transition-colors">contact@fatiabill.ch</a>
+          <a href="mailto:hello@fatiabill.ch" className="hover:text-emerald-500 transition-colors">hello@fatiabill.ch</a>
           <span>·</span>
           <span>© {new Date().getFullYear()} FatiaBill</span>
         </div>
