@@ -13,6 +13,7 @@ import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
 import { Landing } from './landing.jsx';
+import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
   ModalShell, SalaryModal, TransactionModal, GoalModal, LessonModal, UpgradeModal,
@@ -35,6 +36,7 @@ const TaxReport = lazy(() => import('./views/TaxReport.jsx').then((m) => named(m
 const GuidePro = lazy(() => import('./views/GuidePro.jsx').then((m) => named(m, 'GuidePro')));
 const Setup = lazy(() => import('./views/Setup.jsx').then((m) => named(m, 'Setup')));
 const Poursuites = lazy(() => import('./views/Poursuites.jsx').then((m) => named(m, 'Poursuites')));
+const Legal = lazy(() => import('./views/Legal.jsx').then((m) => named(m, 'Legal')));
 
 function ViewLoading() {
   return (
@@ -104,6 +106,7 @@ export default function App() {
   const [goalInitial, setGoalInitial] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [authView, setAuthView] = useState(null); // null = landing, 'login' or 'signup' = AuthScreen
+  const [legalPage, setLegalPage] = useState(null); // null | 'cgu' | 'privacy' | 'mentions'
   const expensesPrivSnapshot = useRef(null);
   const expensesProSnapshot = useRef(null);
 
@@ -556,6 +559,19 @@ export default function App() {
   };
 
   if (authLoading) return <AuthLoadingScreen />;
+
+  if (legalPage) {
+    return (
+      <Suspense fallback={<AuthLoadingScreen />}>
+        <Legal
+          page={legalPage}
+          onClose={() => setLegalPage(null)}
+          onNavigate={(p) => setLegalPage(p)}
+        />
+      </Suspense>
+    );
+  }
+
   if (!user) {
     if (authView) {
       return (
@@ -569,13 +585,17 @@ export default function App() {
       );
     }
     return (
-      <Landing
-        theme={theme}
-        darkMode={darkMode}
-        onToggleDark={() => setDarkMode(!darkMode)}
-        onSignIn={() => setAuthView('login')}
-        onSignUp={() => setAuthView('signup')}
-      />
+      <>
+        <Landing
+          theme={theme}
+          darkMode={darkMode}
+          onToggleDark={() => setDarkMode(!darkMode)}
+          onSignIn={() => setAuthView('login')}
+          onSignUp={() => setAuthView('signup')}
+          onOpenLegal={setLegalPage}
+        />
+        <CookieBanner onOpenPrivacy={() => setLegalPage('privacy')} />
+      </>
     );
   }
   if (!onboardingDone) {
