@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   FileText, Plus, Trash2, Download, AlertCircle, Sparkles, ChevronRight, Lock, Crown,
+  Mail, Send, X, Check,
 } from 'lucide-react';
 
 const TVA_OPTIONS = [
@@ -34,7 +35,7 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
   });
 
   const [debtor, setDebtor] = useState({
-    name: '', address: '', zip: '', city: '',
+    name: '', address: '', zip: '', city: '', email: '',
   });
 
   const [meta, setMeta] = useState({
@@ -42,6 +43,7 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
     invoice_date: today,
     due_date: defaultDue,
     tva_rate: profile?.tva_registered ? '8.1' : '0',
+    description: '',
     notes: '',
   });
 
@@ -51,6 +53,9 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
 
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
+  const [sendModal, setSendModal] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
 
   const subtotal = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.unit_price) || 0), 0);
   const tvaPct = Number(meta.tva_rate) / 100;
@@ -74,6 +79,38 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
     && items.some((it) => it.label && Number(it.unit_price) > 0)
     && total > 0;
 
+  const buildPayload = () => ({
+    creditor: {
+      name: creditorOverride.name,
+      iban: creditorOverride.iban,
+      address: creditorOverride.address,
+      zip: creditorOverride.zip,
+      city: creditorOverride.city,
+      country: 'CH',
+      ide_uid: creditorOverride.ide_uid || null,
+      email: profile?.email || null,
+      phone: profile?.phone || null,
+    },
+    debtor: {
+      name: debtor.name,
+      address: debtor.address,
+      zip: debtor.zip,
+      city: debtor.city,
+      country: 'CH',
+    },
+    items: items.filter((it) => it.label && Number(it.unit_price) > 0).map((it) => ({
+      label: it.label,
+      quantity: Number(it.quantity) || 1,
+      unit_price: Number(it.unit_price) || 0,
+    })),
+    invoice_number: meta.invoice_number,
+    invoice_date: meta.invoice_date,
+    due_date: meta.due_date,
+    tva_rate: meta.tva_rate,
+    description: meta.description || null,
+    notes: meta.notes || null,
+  });
+
   const generate = async () => {
     if (!isPremium) {
       onUpgrade();
@@ -82,39 +119,10 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
     setError(null);
     setGenerating(true);
     try {
-      const payload = {
-        creditor: {
-          name: creditorOverride.name,
-          iban: creditorOverride.iban,
-          address: creditorOverride.address,
-          zip: creditorOverride.zip,
-          city: creditorOverride.city,
-          country: 'CH',
-          ide_uid: creditorOverride.ide_uid || null,
-          email: profile?.email || null,
-        },
-        debtor: {
-          name: debtor.name,
-          address: debtor.address,
-          zip: debtor.zip,
-          city: debtor.city,
-          country: 'CH',
-        },
-        items: items.filter((it) => it.label && Number(it.unit_price) > 0).map((it) => ({
-          label: it.label,
-          quantity: Number(it.quantity) || 1,
-          unit_price: Number(it.unit_price) || 0,
-        })),
-        invoice_number: meta.invoice_number,
-        invoice_date: meta.invoice_date,
-        due_date: meta.due_date,
-        tva_rate: meta.tva_rate,
-        notes: meta.notes || null,
-      };
       const r = await fetch('/api/invoice/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(buildPayload()),
       });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
@@ -133,6 +141,31 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
       setError(e.message || 'Erreur génération');
     }
     setGenerating(false);
+  };
+
+  const sendByEmail = async ({ recipient, subject, message }) => {
+    setError(null);
+    setSending(true);
+    setSendSuccess(false);
+    try {
+      const r = await fetch('/api/invoice/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipient_email: recipient,
+          subject,
+          message,
+          payload: buildPayload(),
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.error) throw new Error(d.error || `Erreur ${r.status}`);
+      setSendSuccess(true);
+      setTimeout(() => { setSendModal(false); setSendSuccess(false); }, 1800);
+    } catch (e) {
+      setError(e.message || 'Échec envoi');
+    }
+    setSending(false);
   };
 
   if (!isPremium) {
@@ -224,6 +257,9 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
             <Input theme={theme} value={debtor.city} onChange={(v) => setDebtor({ ...debtor, city: v })} placeholder="Genève" />
           </Field>
         </div>
+        <Field theme={theme} label="Email client (pour envoi)">
+          <Input theme={theme} type="email" value={debtor.email} onChange={(v) => setDebtor({ ...debtor, email: v })} placeholder="contact@client.ch" />
+        </Field>
       </Section>
 
       <Section theme={theme} title="Informations facture">
@@ -240,6 +276,14 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
         </div>
         <Field theme={theme} label="TVA">
           <Select theme={theme} value={meta.tva_rate} onChange={(v) => setMeta({ ...meta, tva_rate: v })} options={TVA_OPTIONS} />
+        </Field>
+        <Field theme={theme} label="Description du mandat (optionnel — affichée en haut de la facture)">
+          <Input
+            theme={theme}
+            value={meta.description}
+            onChange={(v) => setMeta({ ...meta, description: v })}
+            placeholder="Fabrication et vente de vêtements selon demande client"
+          />
         </Field>
       </Section>
 
@@ -300,29 +344,147 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
         </div>
       )}
 
-      <button
-        onClick={generate}
-        disabled={!canGenerate || generating}
-        className={`w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all ${canGenerate && !generating
-          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:scale-[1.02]'
-          : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
-      >
-        {generating ? (
-          <>
-            <Sparkles size={16} className="animate-spin" /> Génération…
-          </>
-        ) : (
-          <>
-            <Download size={16} /> Télécharger la QR-facture PDF
-          </>
-        )}
-      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          onClick={generate}
+          disabled={!canGenerate || generating}
+          className={`py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all ${canGenerate && !generating
+            ? `${theme.cd} border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50`
+            : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
+        >
+          {generating ? (
+            <>
+              <Sparkles size={16} className="animate-spin" /> Génération…
+            </>
+          ) : (
+            <>
+              <Download size={16} /> Télécharger PDF
+            </>
+          )}
+        </button>
+        <button
+          onClick={() => { setError(null); setSendModal(true); }}
+          disabled={!canGenerate || generating}
+          className={`py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all ${canGenerate
+            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg hover:scale-[1.02]'
+            : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
+        >
+          <Send size={16} /> Envoyer par email
+        </button>
+      </div>
 
       {!canGenerate && (
         <p className={`text-[10px] text-center ${theme.mt}`}>
           Complétez IBAN + adresses + au moins une ligne pour générer.
         </p>
       )}
+
+      {sendModal && (
+        <SendInvoiceModal
+          theme={theme}
+          defaultRecipient={debtor.email}
+          defaultSubject={`Facture ${meta.invoice_number} — ${creditorOverride.name}`}
+          defaultMessage={`Voici la facture pour notre prestation du ${meta.invoice_date}. Merci pour votre confiance.`}
+          sending={sending}
+          success={sendSuccess}
+          error={error}
+          onClose={() => { setSendModal(false); setError(null); }}
+          onSend={sendByEmail}
+        />
+      )}
+    </div>
+  );
+}
+
+function SendInvoiceModal({ theme, defaultRecipient, defaultSubject, defaultMessage, sending, success, error, onClose, onSend }) {
+  const [recipient, setRecipient] = useState(defaultRecipient || '');
+  const [subject, setSubject] = useState(defaultSubject || '');
+  const [message, setMessage] = useState(defaultMessage || '');
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={onClose}>
+      <div
+        className={`w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden sm:rounded-3xl rounded-t-3xl shadow-2xl ${theme.cd} border ${theme.bd}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={`relative p-5 text-white bg-gradient-to-br from-indigo-600 to-purple-700`}>
+          <button onClick={onClose} className="absolute top-3 right-3 bg-white/15 p-1.5 rounded-full hover:bg-white/25 transition-colors">
+            <X size={14} />
+          </button>
+          <Mail size={22} className="mb-2" />
+          <h2 className="text-lg font-black">Envoyer la facture par email</h2>
+          <p className="text-xs opacity-80 mt-0.5">PDF + QR-bill envoyé directement à votre client</p>
+        </div>
+
+        <div className="p-5 space-y-3 overflow-y-auto flex-1">
+          <div>
+            <label className="text-[8px] font-black uppercase text-stone-400 tracking-wider">Destinataire</label>
+            <input
+              type="email"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="contact@client.ch"
+              className={`w-full border rounded-xl p-2.5 text-xs font-bold outline-none ${theme.inp} focus:border-indigo-500 transition-colors`}
+            />
+            {recipient && !validEmail && (
+              <p className="text-[10px] text-rose-500 mt-1">Adresse email invalide</p>
+            )}
+          </div>
+          <div>
+            <label className="text-[8px] font-black uppercase text-stone-400 tracking-wider">Objet</label>
+            <input
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className={`w-full border rounded-xl p-2.5 text-xs font-bold outline-none ${theme.inp} focus:border-indigo-500`}
+            />
+          </div>
+          <div>
+            <label className="text-[8px] font-black uppercase text-stone-400 tracking-wider">Message (optionnel)</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              className={`w-full border rounded-xl p-2.5 text-xs font-medium outline-none ${theme.inp} focus:border-indigo-500`}
+            />
+            <p className={`text-[10px] ${theme.mt} mt-1`}>
+              Le PDF avec QR-bill est ajouté automatiquement. Une mention "envoyé via FatiaBill" apparaît en pied de mail.
+            </p>
+          </div>
+
+          {error && !success && (
+            <div className={`p-3 rounded-xl text-[11px] font-bold flex items-start gap-2 ${theme.dk ? 'bg-rose-950/40 text-rose-300 border border-rose-500/30' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+              <AlertCircle size={14} className="flex-shrink-0 mt-0.5" /> {error}
+            </div>
+          )}
+        </div>
+
+        <div className={`p-4 border-t ${theme.bd}`}>
+          <button
+            onClick={() => onSend({ recipient, subject, message })}
+            disabled={!validEmail || !subject || sending}
+            className={`w-full py-3 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all ${success
+              ? 'bg-emerald-500 text-white'
+              : validEmail && subject && !sending
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:scale-[1.02] shadow-lg'
+                : 'bg-stone-200 text-stone-400 cursor-not-allowed'}`}
+          >
+            {success ? (
+              <>
+                <Check size={16} /> Envoyé !
+              </>
+            ) : sending ? (
+              <>
+                <Sparkles size={16} className="animate-spin" /> Envoi en cours…
+              </>
+            ) : (
+              <>
+                <Send size={16} /> Envoyer
+              </>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
