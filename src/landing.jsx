@@ -240,8 +240,22 @@ function Principles({ theme }) {
 function AppPreview({ theme }) {
 
   return (
-    <section className={`py-16 md:py-20 ${theme.dk ? 'bg-zinc-900/50' : 'bg-stone-50'}`}>
-      <div className="max-w-5xl mx-auto px-4">
+    <section className="relative py-16 md:py-20 overflow-hidden">
+      <div
+        aria-hidden
+        className={`absolute inset-0 ${theme.dk
+          ? 'bg-gradient-to-br from-emerald-950/50 via-zinc-950 to-zinc-900'
+          : 'bg-gradient-to-br from-emerald-50 via-teal-50/40 to-stone-100'}`}
+      />
+      <div
+        aria-hidden
+        className={`absolute top-12 right-1/4 w-96 h-96 rounded-full blur-3xl pointer-events-none ${theme.dk ? 'bg-emerald-500/15' : 'bg-emerald-300/40'}`}
+      />
+      <div
+        aria-hidden
+        className={`absolute bottom-0 left-1/4 w-80 h-80 rounded-full blur-3xl pointer-events-none ${theme.dk ? 'bg-teal-500/10' : 'bg-teal-200/40'}`}
+      />
+      <div className="relative max-w-5xl mx-auto px-4">
         <div className="text-center mb-10">
           <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Aperçu</p>
           <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
