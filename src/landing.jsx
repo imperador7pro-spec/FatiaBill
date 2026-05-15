@@ -38,15 +38,6 @@ export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
 // Shared atoms
 // ─────────────────────────────────────────────────
 
-function SectionTag({ number, total = '07', tagline, t }) {
-  return (
-    <div className={`text-[10px] font-mono uppercase tracking-[0.2em] ${t.mt}`}>
-      §{number} / {total}<br />
-      {tagline}
-    </div>
-  );
-}
-
 function Eyebrow({ children, t }) {
   return (
     <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${t.mt}`}>
@@ -244,17 +235,14 @@ function DashboardScreen({ t }) {
 
 function WhatItDoes({ t }) {
   return (
-    <section className={`py-20 md:py-28 ${t.sf}`}>
+    <section className={`py-14 md:py-20 ${t.sf}`}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-12 md:mb-16">
-          <div className="max-w-3xl">
-            <Eyebrow t={t}>Ce que fait FatiaBill</Eyebrow>
-            <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
-              Tout votre argent,<br />
-              <span className={`italic ${ACCENT}`}>une seule app</span>.
-            </h2>
-          </div>
-          <SectionTag number="02" tagline="Conçu pour la Suisse" t={t} />
+        <div className="max-w-3xl mb-10 md:mb-14">
+          <Eyebrow t={t}>Ce que fait FatiaBill</Eyebrow>
+          <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
+            Tout votre argent,<br />
+            <span className={`italic ${ACCENT}`}>une seule app</span>.
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-5">
@@ -317,18 +305,13 @@ function CoachIA({ t, onSignUp }) {
     'Mes économies tiennent combien de temps ?',
   ];
   return (
-    <section id="coach" className="bg-zinc-950 text-zinc-100 py-20 md:py-28">
+    <section id="coach" className="bg-zinc-950 text-zinc-100 py-14 md:py-20">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-12 md:mb-16">
-          <h2 className={`${SERIF} text-4xl md:text-5xl leading-[1.05] tracking-tight max-w-2xl`}>
-            Pas un chatbot.
-            <br />
-            <span className={`italic ${ACCENT}`}>Un coach</span> qui connaît vos comptes.
-          </h2>
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 text-right">
-            §03 / 07<br />Démonstration<br />en temps réel
-          </div>
-        </div>
+        <h2 className={`${SERIF} text-4xl md:text-5xl leading-[1.05] tracking-tight max-w-2xl mb-10 md:mb-14`}>
+          Pas un chatbot.
+          <br />
+          <span className={`italic ${ACCENT}`}>Un coach</span> qui connaît vos comptes.
+        </h2>
 
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
@@ -416,17 +399,14 @@ function HowItWorks({ t, onSignUp }) {
     { n: '03', title: 'Coach + outils prêts', body: 'Dashboard, scanner, simulateur, coach IA contextuel.', sub: '14 jours illimités' },
   ];
   return (
-    <section id="how-it-works" className={`py-20 md:py-28 ${t.bg}`}>
+    <section id="how-it-works" className={`py-14 md:py-20 ${t.bg}`}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-12 md:mb-16">
-          <div>
-            <Eyebrow t={t}>Comment ça marche</Eyebrow>
-            <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
-              De zéro à votre tableau de bord,<br />
-              <span className={`italic ${ACCENT}`}>en moins de 3 minutes</span>.
-            </h2>
-          </div>
-          <SectionTag number="04" tagline="Essai sans CB" t={t} />
+        <div className="mb-10 md:mb-14">
+          <Eyebrow t={t}>Comment ça marche</Eyebrow>
+          <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
+            De zéro à votre tableau de bord,<br />
+            <span className={`italic ${ACCENT}`}>en moins de 3 minutes</span>.
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-5">
@@ -467,17 +447,14 @@ function Overview({ t }) {
     { icon: LifeBuoy, title: 'SOS Poursuite', body: 'Le seul outil suisse qui aborde dettes et désendettement directement, avec les ressources gratuites.' },
   ];
   return (
-    <section className={`py-20 md:py-28 ${t.sf}`}>
+    <section className={`py-14 md:py-20 ${t.sf}`}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-12 md:mb-16">
-          <div>
-            <Eyebrow t={t}>L'app en un coup d'œil</Eyebrow>
-            <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
-              Une vue d'ensemble<br />
-              <span className={`italic ${ACCENT}`}>complète</span>.
-            </h2>
-          </div>
-          <SectionTag number="05" tagline="iOS · Android" t={t} />
+        <div className="mb-10 md:mb-14">
+          <Eyebrow t={t}>L'app en un coup d'œil</Eyebrow>
+          <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
+            Une vue d'ensemble<br />
+            <span className={`italic ${ACCENT}`}>complète</span>.
+          </h2>
         </div>
 
         {/* 3 phones */}
@@ -606,17 +583,14 @@ function ChatScreen({ t }) {
 
 function SOSPoursuite({ t, onSignUp }) {
   return (
-    <section className={`py-20 md:py-28 ${t.bg}`}>
+    <section className={`py-14 md:py-20 ${t.bg}`}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-10 md:mb-14">
-          <div className="max-w-3xl">
-            <Eyebrow t={t}>Le sujet que personne n'aborde</Eyebrow>
-            <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
-              En difficulté ?<br />
-              <span className="italic text-rose-600">Vous n'êtes pas seul·e</span>.
-            </h2>
-          </div>
-          <SectionTag number="06" tagline="Différenciateur clé" t={t} />
+        <div className="max-w-3xl mb-10 md:mb-12">
+          <Eyebrow t={t}>Le sujet que personne n'aborde</Eyebrow>
+          <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
+            En difficulté ?<br />
+            <span className="italic text-rose-600">Vous n'êtes pas seul·e</span>.
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-[1.3fr_1fr] gap-6 items-stretch">
@@ -702,17 +676,14 @@ function Pricing({ t, onSignUp }) {
   ];
 
   return (
-    <section className={`py-20 md:py-28 ${t.sf}`}>
+    <section className={`py-14 md:py-20 ${t.sf}`}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-start mb-12 md:mb-16">
-          <div>
-            <Eyebrow t={t}>Tarifs</Eyebrow>
-            <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
-              Un abonnement.<br />
-              <span className={`italic ${ACCENT}`}>Aucun frais caché</span>.
-            </h2>
-          </div>
-          <SectionTag number="07" tagline="Annulable à tout moment" t={t} />
+        <div className="mb-10 md:mb-14">
+          <Eyebrow t={t}>Tarifs</Eyebrow>
+          <h2 className={`${SERIF} text-4xl md:text-5xl mt-3 leading-[1.05] tracking-tight ${t.tx}`}>
+            Un abonnement.<br />
+            <span className={`italic ${ACCENT}`}>Aucun frais caché</span>.
+          </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -775,7 +746,7 @@ function FAQ({ t }) {
     { q: 'Comment FatiaBill aborde-t-il les dettes / poursuites ?', a: 'C\'est l\'un de nos différenciateurs majeurs. Une section dédiée "SOS Poursuite" guide pas à pas, oriente vers les services gratuits suisses (Caritas, CSP, Dettes Conseils Suisse), et le coach IA détecte automatiquement les signaux de difficulté financière pour répondre avec calme et ressources concrètes.' },
   ];
   return (
-    <section className={`py-20 md:py-28 ${t.bg}`}>
+    <section className={`py-14 md:py-20 ${t.bg}`}>
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-12">
           <Eyebrow t={t}>FAQ</Eyebrow>
