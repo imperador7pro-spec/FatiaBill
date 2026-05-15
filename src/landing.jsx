@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Crown, Sparkles, Camera, FileSignature, MapPin, MessageCircle, GraduationCap,
   Check, ArrowRight, Shield, Sun, Moon, Coins, Building2, Receipt,
-  ChevronRight,
+  ChevronRight, Mail, Rocket,
 } from 'lucide-react';
 
 export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
@@ -12,6 +12,7 @@ export function Landing({ theme, darkMode, onToggleDark, onSignUp, onSignIn }) {
       <Hero theme={theme} onSignUp={onSignUp} />
       <TrustBand theme={theme} />
       <Principles theme={theme} />
+      <HowItWorks theme={theme} onSignUp={onSignUp} />
       <Features theme={theme} />
       <Pricing theme={theme} onSignUp={onSignUp} />
       <FAQ theme={theme} />
@@ -230,6 +231,88 @@ function Principles({ theme }) {
             </div>
           );
         })}
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks({ theme, onSignUp }) {
+  const steps = [
+    {
+      n: 1,
+      icon: Mail,
+      title: 'Créez votre compte',
+      duration: '30 secondes',
+      body: 'Email + mot de passe. Aucune carte bancaire requise.',
+    },
+    {
+      n: 2,
+      icon: MapPin,
+      title: 'Profil par canton',
+      duration: 'Wizard 4 étapes',
+      body: 'Canton, permis, situation famille, prévoyance. Tout sera calibré pour vous.',
+    },
+    {
+      n: 3,
+      icon: Rocket,
+      title: 'Coach + outils prêts',
+      duration: '14 jours illimités',
+      body: 'Dashboard, scanner, simulateur, coach IA contextuel — explorez sans engagement.',
+    },
+  ];
+
+  return (
+    <section className={`py-16 md:py-20 border-y ${theme.bd} ${theme.dk ? 'bg-zinc-950' : 'bg-white'}`}>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <p className="text-[11px] font-black uppercase tracking-widest text-emerald-500 mb-2">Comment ça marche</p>
+          <h2 className={`text-2xl md:text-3xl font-black tracking-tight ${theme.tx}`}>
+            De zéro à votre tableau de bord en moins de 3 minutes.
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6 md:gap-8 relative">
+          {steps.map((s, i) => {
+            const Ic = s.icon;
+            const last = i === steps.length - 1;
+            return (
+              <div
+                key={s.n}
+                className={`relative p-6 rounded-3xl border-2 ${theme.cd} ${theme.bd} ${last ? '' : 'md:mr-2'}`}
+                style={{
+                  animation: 'fade-up 0.6s ease-out both',
+                  animationDelay: `${0.15 + i * 0.15}s`,
+                }}
+              >
+                <div className="absolute -top-4 -left-4 w-10 h-10 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-black text-lg shadow-lg shadow-emerald-500/30">
+                  {s.n}
+                </div>
+                {!last && (
+                  <ArrowRight
+                    size={28}
+                    className={`hidden md:block absolute top-1/2 -translate-y-1/2 text-emerald-500 z-10`}
+                    style={{ right: '-30px', animation: 'sparkle-pulse 2.8s ease-in-out infinite' }}
+                  />
+                )}
+                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-3 mt-2">
+                  <Ic size={22} />
+                </div>
+                <h3 className={`font-black text-base ${theme.tx}`}>{s.title}</h3>
+                <p className={`text-[10px] font-black uppercase tracking-wider mt-1 ${theme.dk ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                  {s.duration}
+                </p>
+                <p className={`text-xs mt-3 leading-relaxed ${theme.mt}`}>{s.body}</p>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-center mt-10">
+          <button
+            onClick={onSignUp}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl text-sm shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+          >
+            Commencer maintenant <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
     </section>
   );
