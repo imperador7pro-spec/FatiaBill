@@ -778,9 +778,12 @@ function Footer({ t }) {
   return (
     <footer className={`border-t py-12 ${t.bd}`}>
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Logo size="md" />
-          <span className={`text-[10px] ${t.mt}`}>· Conçu en Suisse 🇨🇭</span>
+        <div className="flex flex-col items-center md:items-start gap-1">
+          <div className="flex items-center gap-3">
+            <Logo size="md" />
+            <span className={`text-[10px] ${t.mt}`}>· Conçu en Suisse 🇨🇭</span>
+          </div>
+          <span className={`text-[10px] ${t.mt}`}>Un produit Duares Systems · Aclens</span>
         </div>
         <div className={`flex items-center gap-4 text-[11px] font-bold ${t.mt}`}>
           <a href="mailto:hello@fatiabill.ch" className="hover:text-emerald-600 transition-colors">hello@fatiabill.ch</a>
