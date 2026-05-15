@@ -110,7 +110,7 @@ export const db = {
 
   // ─── Profile ───
   getProfile: async (uid) => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
+    const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle();
     return data;
   },
   updateProfile: (uid, u) =>
@@ -165,7 +165,7 @@ export const db = {
 
   // ─── Academy progress ───
   getProgress: async (uid) => {
-    const { data } = await supabase.from('academy_progress').select('*').eq('user_id', uid).single();
+    const { data } = await supabase.from('academy_progress').select('*').eq('user_id', uid).maybeSingle();
     return data;
   },
   upsertProgress: (p) => supabase.from('academy_progress').upsert(p),

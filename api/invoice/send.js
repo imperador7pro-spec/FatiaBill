@@ -38,7 +38,9 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Envoi email non configuré — ajoutez RESEND_API_KEY dans Vercel.' });
   }
   if (!process.env.INVOICE_FROM_EMAIL) {
-    return res.status(500).json({ error: 'Adresse expéditeur non configurée — ajoutez INVOICE_FROM_EMAIL dans Vercel.' });
+    return res.status(500).json({
+      error: 'Adresse expéditeur manquante — ajoutez INVOICE_FROM_EMAIL dans Vercel. Test rapide: onboarding@resend.dev (n\'envoie qu\'à votre email Resend). Production: vérifiez fatiabill.ch sur resend.com puis utilisez factures@fatiabill.ch.',
+    });
   }
 
   const { recipient_email, subject, message, payload } = req.body || {};
