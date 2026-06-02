@@ -30,6 +30,10 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
+      // Surface Stripe's native "Have a promotion code?" field at checkout
+      // so partnership codes (MAILLOT2026, etc.) can be entered self-service.
+      // Coupon/promotion code creation happens in the Stripe Dashboard.
+      allow_promotion_codes: true,
       success_url: `${origin}?success=true`,
       cancel_url: `${origin}?canceled=true`,
       metadata: { userId, appMode: mode },

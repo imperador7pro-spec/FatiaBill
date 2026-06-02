@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { GOAL_PRESETS, EXPENSE_CATEGORIES, getIcon } from './data.js';
 import { PLAN_FEATURES } from './plan.js';
+import { getAttribution } from './analytics.js';
 
 export function ModalShell({ theme, modal, onClose, children }) {
   if (!modal) return null;
@@ -275,6 +276,13 @@ export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgra
   const planLabel = isPro ? 'Pro' : 'Privé';
   const isTrial = effPlan === 'trial';
 
+  // Surface a code-promo hint for users who arrived via a tracked campaign
+  // (jersey ad, partner referral). The actual code is entered on Stripe Checkout.
+  const attribution = getAttribution();
+  const campaignCode = attribution?.utm_campaign
+    ? attribution.utm_campaign.toUpperCase().slice(0, 20)
+    : null;
+
   const includes = (row) => {
     const v = isPro ? row.premium : (row.premium === 'pro' ? false : row.premium);
     return v !== false;
@@ -344,6 +352,14 @@ export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgra
       </div>
 
       <div className={`p-4 border-t ${theme.bd} space-y-2`}>
+        {campaignCode && (
+          <div className={`p-2.5 rounded-xl border border-dashed text-center ${theme.dk ? 'border-amber-700 bg-amber-950/30' : 'border-amber-400 bg-amber-50'}`}>
+            <p className={`text-[10px] font-black uppercase ${theme.dk ? 'text-amber-400' : 'text-amber-700'}`}>Code promo détecté</p>
+            <p className={`text-xs font-bold ${theme.tx}`}>
+              Saisissez <code className={`font-mono font-black px-1.5 py-0.5 rounded ${theme.dk ? 'bg-amber-900/40' : 'bg-amber-200'}`}>{campaignCode}</code> à l'étape de paiement
+            </p>
+          </div>
+        )}
         <button
           onClick={() => { onUpgrade(); onClose(); }}
           className={`plausible-event-name=Upgrade+Started plausible-event-plan=${isPro ? 'Pro' : 'Prive'} w-full py-3.5 text-white font-black rounded-2xl text-sm shadow-lg transition-transform hover:scale-[1.02] ${isPro ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
