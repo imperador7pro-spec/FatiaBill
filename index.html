@@ -3,10 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="description" content="FatiaBill — Copilote financier suisse. Budget, épargne, coaching IA."/>
   <meta name="theme-color" content="#10b981"/>
-  <title>FatiaBill — Copilote Financier Suisse</title>
+  <title>FatiaBill — Copilote financier suisse pour particuliers et indépendants</title>
+  <meta name="description" content="Pilotez vos finances suisses simplement : budget, fiscalité cantonale (26 cantons), QR-factures, coach IA. Pour particuliers et indépendants. 14 jours d'essai gratuit, sans carte bancaire."/>
+  <meta name="keywords" content="copilote financier suisse, fiscalité canton, QR-facture, coach IA finance, budget Suisse, 3a pilier, brut net Suisse"/>
+  <meta name="author" content="Duares Systems"/>
+  <link rel="canonical" href="https://fatiabill.ch/"/>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+
+  <!-- Perf: preconnect to critical third parties (Stripe + Supabase + Fonts) -->
+  <link rel="preconnect" href="https://js.stripe.com"/>
+  <link rel="dns-prefetch" href="https://api.stripe.com"/>
+  <link rel="dns-prefetch" href="https://api.anthropic.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest"/>
   <link rel="apple-touch-icon" href="/favicon.svg"/>
@@ -14,6 +25,65 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="FatiaBill"/>
   <meta name="mobile-web-app-capable" content="yes"/>
+
+  <!-- Open Graph (Facebook, WhatsApp, LinkedIn, Discord) -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="FatiaBill"/>
+  <meta property="og:title" content="FatiaBill — Copilote financier suisse"/>
+  <meta property="og:description" content="Budget, fiscalité cantonale, QR-factures et coach IA pour particuliers et indépendants en Suisse. 14 jours d'essai gratuit, sans carte bancaire."/>
+  <meta property="og:url" content="https://fatiabill.ch/"/>
+  <meta property="og:image" content="https://fatiabill.ch/api/og"/>
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt" content="FatiaBill — Le copilote de vos finances, jamais de votre vie"/>
+  <meta property="og:locale" content="fr_CH"/>
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="FatiaBill — Copilote financier suisse"/>
+  <meta name="twitter:description" content="Budget, fiscalité 26 cantons, QR-factures, coach IA. Essai 14 j sans CB."/>
+  <meta name="twitter:image" content="https://fatiabill.ch/api/og"/>
+
+  <!-- Schema.org Organization + SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "FatiaBill",
+        "url": "https://fatiabill.ch",
+        "logo": "https://fatiabill.ch/favicon.svg",
+        "parentOrganization": {
+          "@type": "Organization",
+          "name": "Duares Systems",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Aclens",
+            "addressCountry": "CH"
+          }
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "hello@fatiabill.ch",
+          "contactType": "customer support",
+          "availableLanguage": ["French"]
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "FatiaBill",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web, iOS, Android (PWA)",
+        "offers": [
+          { "@type": "Offer", "name": "Privé Premium", "price": "9", "priceCurrency": "CHF" },
+          { "@type": "Offer", "name": "Pro Premium", "price": "29", "priceCurrency": "CHF" }
+        ],
+        "url": "https://fatiabill.ch"
+      }
+    ]
+  }
+  </script>
 </head>
 <body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body>
 </html>
