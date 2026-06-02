@@ -8,6 +8,7 @@ import {
   EMPLOYMENT_STATUS_OPTIONS, BUSINESS_FORM_OPTIONS, BUSINESS_SECTORS, LAMAL_FRANCHISES,
 } from '../data.js';
 import { auth } from '../supabase.js';
+import { useToast } from '../toast.jsx';
 
 const isValidIBAN = (iban) => {
   if (!iban) return true;
@@ -65,6 +66,7 @@ export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfi
 }
 
 function DataRightsSection({ theme, onAccountDeleted }) {
+  const toast = useToast();
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -92,8 +94,10 @@ function DataRightsSection({ theme, onAccountDeleted }) {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success('Export téléchargé');
     } catch (e) {
       setExportError(e?.message || 'Erreur export');
+      toast.error(e?.message || 'Erreur export');
     }
     setExporting(false);
   };

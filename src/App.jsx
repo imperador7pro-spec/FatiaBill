@@ -17,6 +17,7 @@ import { track, getAttribution } from './analytics.js';
 import { supabase } from './supabase.js';
 import { FirstWinModal, hasSeenFirstWin, markFirstWinSeen } from './firstWin.jsx';
 import { ReactivationScreen, shouldShowReactivation, markReactivationShown } from './reactivation.jsx';
+import { useToast } from './toast.jsx';
 import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
@@ -72,6 +73,7 @@ function syncExpensesDelta(current, snapshot, userId, mode) {
 }
 
 export default function App() {
+  const toast = useToast();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -335,9 +337,9 @@ export default function App() {
       });
       const { url, error } = await res.json();
       if (url) window.location.href = url;
-      else alert(error || 'Erreur de paiement');
+      else toast.error(error || 'Erreur de paiement');
     } catch {
-      alert('Erreur de connexion au service de paiement');
+      toast.error('Erreur de connexion au service de paiement');
     }
   };
 
@@ -437,6 +439,7 @@ export default function App() {
     setTransactions([tx, ...transactions]);
     setModal(null);
     if (user) db.upsertTransaction(tx, user.id);
+    toast.success(tx.type === 'IN' ? 'Recette enregistrée' : 'Dépense enregistrée');
   };
 
   const toggleTransactionStatus = (id) => {
@@ -491,6 +494,7 @@ export default function App() {
     }
     setModal(null);
     if (user && saved) db.upsertGoal(saved, user.id);
+    toast.success(editingGoalIdx !== null ? 'Objectif mis à jour' : 'Objectif créé');
   };
 
   const deleteGoal = (idx) => {
@@ -571,6 +575,7 @@ export default function App() {
     }
     setScanResult(null);
     setScanError(null);
+    toast.success('Document archivé');
   };
 
   const openLesson = (lesson) => {

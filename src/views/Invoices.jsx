@@ -3,6 +3,7 @@ import {
   FileText, Plus, Trash2, Download, AlertCircle, Sparkles, ChevronRight, Lock, Crown,
   Mail, Send, X, Check,
 } from 'lucide-react';
+import { useToast } from '../toast.jsx';
 
 const TVA_OPTIONS = [
   { value: '8.1', label: '8.1% (taux standard)' },
@@ -22,6 +23,7 @@ function fmtCHF(n) {
 }
 
 export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
+  const toast = useToast();
   const today = new Date().toISOString().split('T')[0];
   const defaultDue = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
 
@@ -161,9 +163,11 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
       const d = await r.json().catch(() => ({}));
       if (!r.ok || d.error) throw new Error(d.error || `Erreur ${r.status}`);
       setSendSuccess(true);
+      toast.success('Facture envoyée par email');
       setTimeout(() => { setSendModal(false); setSendSuccess(false); }, 1800);
     } catch (e) {
       setError(e.message || 'Échec envoi');
+      toast.error(e.message || 'Échec envoi');
     }
     setSending(false);
   };
