@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { withSentry, captureException } from '../_lib/sentry.js';
 
 async function cancelStripeSubscriptions(stripeCustomerId) {
   if (!stripeCustomerId || !process.env.STRIPE_SECRET_KEY) return;
@@ -14,7 +15,7 @@ async function cancelStripeSubscriptions(stripeCustomerId) {
   }
 }
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -79,7 +80,9 @@ export default async function handler(req, res) {
 
     res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('Account deletion error:', err);
+    await captureException(err, { route: 'account/delete', userId: uid });
     res.status(500).json({ error: err?.message || 'Erreur lors de la suppression' });
   }
 }
+
+export default withSentry(handler, 'account/delete');

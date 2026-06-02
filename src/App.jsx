@@ -239,6 +239,14 @@ export default function App() {
     if (!error && data?.user) {
       setUser(data.user);
       await loadAllUserData(data.user);
+      // Fire welcome email — non-blocking, idempotent server-side
+      auth.getAccessToken().then((token) => {
+        if (!token) return;
+        fetch('/api/email/welcome', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      });
     }
     return { error };
   };

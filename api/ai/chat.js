@@ -124,7 +124,11 @@ RÈGLES GÉNÉRALES:
 - Préférer 1 action concrète à faire cette semaine > généralités`;
 }
 
-export default async function handler(req, res) {
+import { requireUser } from '../_lib/auth.js';
+import { enforceRateLimit } from '../_lib/rate-limit.js';
+import { withSentry, captureException } from '../_lib/sentry.js';
+
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -132,6 +136,18 @@ export default async function handler(req, res) {
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return res.status(500).json({ error: 'ANTHROPIC_API_KEY manquante dans les variables Vercel' });
+
+  const auth = await requireUser(req, res);
+  if (!auth) return;
+
+  // 20 messages / 5 min per user — generous for normal use, blocks runaway loops.
+  const ok = await enforceRateLimit(req, res, {
+    key: `ai:chat:${auth.user.id}`,
+    max: 20,
+    windowSec: 300,
+    label: 'Coach IA',
+  });
+  if (!ok) return;
 
   try {
     const { message, context, mode } = req.body || {};
@@ -157,13 +173,19 @@ export default async function handler(req, res) {
 
     const data = await r.json();
     if (!r.ok) {
-      console.error('Anthropic error:', data);
+      await captureException(new Error(`Anthropic ${r.status}: ${data?.error?.message || 'unknown'}`), {
+        route: 'ai/chat',
+        upstreamStatus: r.status,
+        userId: auth.user.id,
+      });
       return res.status(502).json({ error: data?.error?.message || 'Service IA indisponible' });
     }
     const text = data.content?.map(c => c.text || '').join('\n') || 'Erreur.';
     res.status(200).json({ response: text });
   } catch (err) {
-    console.error('AI error:', err.message);
+    await captureException(err, { route: 'ai/chat', userId: auth.user.id });
     res.status(500).json({ error: 'Service IA indisponible' });
   }
 }
+
+export default withSentry(handler, 'ai/chat');
