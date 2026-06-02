@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
+import { withSentry, captureException } from '../_lib/sentry.js';
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -66,7 +67,9 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.status(200).send(JSON.stringify(exportData, null, 2));
   } catch (err) {
-    console.error('Export error:', err);
+    await captureException(err, { route: 'account/export', userId: uid });
     res.status(500).json({ error: err?.message || 'Erreur lors de l\'export' });
   }
 }
+
+export default withSentry(handler, 'account/export');

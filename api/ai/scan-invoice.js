@@ -28,7 +28,11 @@ Règles:
 
 Rappelle: JSON pur uniquement, rien d'autre.`;
 
-export default async function handler(req, res) {
+import { requireUser } from '../_lib/auth.js';
+import { enforceRateLimit } from '../_lib/rate-limit.js';
+import { withSentry, captureException } from '../_lib/sentry.js';
+
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
@@ -36,6 +40,18 @@ export default async function handler(req, res) {
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return res.status(500).json({ error: 'ANTHROPIC_API_KEY manquante' });
+
+  const auth = await requireUser(req, res);
+  if (!auth) return;
+
+  // Vision is expensive — 10 scans / 5 min per user.
+  const ok = await enforceRateLimit(req, res, {
+    key: `ai:scan:${auth.user.id}`,
+    max: 10,
+    windowSec: 300,
+    label: 'Scanner IA',
+  });
+  if (!ok) return;
 
   try {
     const { image_base64, mime_type } = req.body || {};
@@ -78,7 +94,11 @@ export default async function handler(req, res) {
 
     const data = await r.json();
     if (!r.ok) {
-      console.error('Anthropic Vision error:', data);
+      await captureException(new Error(`Anthropic Vision ${r.status}: ${data?.error?.message || 'unknown'}`), {
+        route: 'ai/scan-invoice',
+        upstreamStatus: r.status,
+        userId: auth.user.id,
+      });
       const upstream = data?.error?.message || '';
       let userFacing = upstream || 'Service Vision indisponible';
       if (r.status === 401 || /invalid x-api-key|authentication/i.test(upstream)) {
@@ -95,7 +115,7 @@ export default async function handler(req, res) {
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : text);
     } catch (e) {
-      console.error('JSON parse failed. Raw response:', text);
+      await captureException(e, { route: 'ai/scan-invoice', stage: 'json-parse', raw: text?.slice(0, 500) });
       return res.status(502).json({ error: 'Impossible de structurer la réponse IA', raw: text });
     }
 
@@ -105,7 +125,9 @@ export default async function handler(req, res) {
 
     res.status(200).json({ extracted: parsed });
   } catch (err) {
-    console.error('Scan error:', err.message);
+    await captureException(err, { route: 'ai/scan-invoice', userId: auth.user.id });
     res.status(500).json({ error: 'Service de scan indisponible' });
   }
 }
+
+export default withSentry(handler, 'ai/scan-invoice');
