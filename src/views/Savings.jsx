@@ -4,6 +4,7 @@ import {
   ArrowUpRight, Star, TrendingUp,
 } from 'lucide-react';
 import { getIcon } from '../data.js';
+import { EmptyState } from '../components/EmptyState.jsx';
 
 export function Savings({ theme, goals, monthlyCapacity, salary, computeProjection, onOpenSalary, onAddGoal, onEditGoal, onDeleteGoal }) {
   const [openIdx, setOpenIdx] = useState(null);
@@ -32,11 +33,15 @@ export function Savings({ theme, goals, monthlyCapacity, salary, computeProjecti
         )}
       </div>
       {goals.length === 0 ? (
-        <div className={`p-10 text-center rounded-3xl border border-dashed ${theme.bd} ${theme.mt}`}>
-          <Target size={36} className="mx-auto mb-2 opacity-20" />
-          <p className="font-bold text-sm mb-4">Créez votre premier objectif</p>
-          <button onClick={() => onAddGoal()} className="px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm">Créer</button>
-        </div>
+        <EmptyState
+          theme={theme}
+          icon={Target}
+          title="Créez votre 1er objectif"
+          description="Achat immobilier, voyage, 3A pour économiser jusqu'à 1'500 CHF d'impôts par an, fonds d'urgence (6 mois de charges)… FatiaBill projette automatiquement la durée et les meilleurs véhicules d'épargne."
+          ctaLabel="Créer un objectif"
+          onCta={() => onAddGoal()}
+          hint="Exemple : 3A à 7'258 CHF/an = ~ 1'450 CHF d'économie d'impôts dans la plupart des cantons"
+        />
       ) : (
         goals.map((g, idx) => {
           const Ic = getIcon(g.i);
