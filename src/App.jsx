@@ -15,9 +15,22 @@ import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
 import { Landing } from './landing.jsx';
 import { track, getAttribution } from './analytics.js';
 import { supabase } from './supabase.js';
-import { FirstWinModal, hasSeenFirstWin, markFirstWinSeen } from './firstWin.jsx';
-import { ReactivationScreen, shouldShowReactivation, markReactivationShown } from './reactivation.jsx';
 import { useToast } from './toast.jsx';
+
+// Rare-use modals tirent du calcul lourd (swissCharges, cantonTax) — lazy them
+// to keep the initial bundle lean. Tiny helpers for marker storage stay synchronous.
+const FirstWinModal = lazy(() => import('./firstWin.jsx').then((m) => ({ default: m.FirstWinModal })));
+const ReactivationScreen = lazy(() => import('./reactivation.jsx').then((m) => ({ default: m.ReactivationScreen })));
+
+// First-win seen marker (sync, lightweight — read on every onboarding completion)
+const FIRST_WIN_KEY = 'fb_first_win_shown_at';
+const hasSeenFirstWin = () => { try { return !!localStorage.getItem(FIRST_WIN_KEY); } catch { return false; } };
+const markFirstWinSeen = () => { try { localStorage.setItem(FIRST_WIN_KEY, new Date().toISOString()); } catch {} };
+
+// Reactivation seen marker (per-session)
+const REACTIVATION_KEY = 'fb_reactivation_shown_session';
+const shouldShowReactivation = () => { try { return !sessionStorage.getItem(REACTIVATION_KEY); } catch { return false; } };
+const markReactivationShown = () => { try { sessionStorage.setItem(REACTIVATION_KEY, '1'); } catch {} };
 import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
@@ -808,6 +821,7 @@ export default function App() {
             theme={theme}
             mode={mode}
             profile={profile}
+            effPlan={effPlan}
             expenses={expenses}
             setExpenses={setExpenses}
             onSaveProfile={saveProfileFields}
@@ -862,31 +876,35 @@ export default function App() {
         )}
       </ModalShell>
       {modal === 'first_win' && (
-        <FirstWinModal
-          theme={theme}
-          profile={profile}
-          mode={mode}
-          onClose={() => { markFirstWinSeen(); setModal(null); }}
-          onOpenCoach={() => { markFirstWinSeen(); setView(mode === 'pro' ? 'ai_pro' : 'ai'); }}
-        />
+        <Suspense fallback={null}>
+          <FirstWinModal
+            theme={theme}
+            profile={profile}
+            mode={mode}
+            onClose={() => { markFirstWinSeen(); setModal(null); }}
+            onOpenCoach={() => { markFirstWinSeen(); setView(mode === 'pro' ? 'ai_pro' : 'ai'); }}
+          />
+        </Suspense>
       )}
       {modal === 'reactivation' && (
-        <ReactivationScreen
-          theme={theme}
-          profile={profile}
-          mode={mode}
-          expensesCount={expenses.length}
-          transactionsCount={transactions.length}
-          goalsCount={goals.length}
-          documentsCount={documents.length}
-          onUpgrade={() => { setModal(null); handleUpgrade(); }}
-          onContinue={() => setModal(null)}
-          onExport={() => {
-            markReactivationShown();
-            setModal(null);
-            setView('setup');
-          }}
-        />
+        <Suspense fallback={null}>
+          <ReactivationScreen
+            theme={theme}
+            profile={profile}
+            mode={mode}
+            expensesCount={expenses.length}
+            transactionsCount={transactions.length}
+            goalsCount={goals.length}
+            documentsCount={documents.length}
+            onUpgrade={() => { setModal(null); handleUpgrade(); }}
+            onContinue={() => setModal(null)}
+            onExport={() => {
+              markReactivationShown();
+              setModal(null);
+              setView('setup');
+            }}
+          />
+        </Suspense>
       )}
     </div>
   );
