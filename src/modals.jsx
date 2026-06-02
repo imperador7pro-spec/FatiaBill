@@ -275,17 +275,14 @@ export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgra
   const planLabel = isPro ? 'Pro' : 'Privé';
   const isTrial = effPlan === 'trial';
 
-  const renderCell = (value) => {
-    if (value === true || value === 'pro') return <Check size={14} className="text-emerald-500 mx-auto" strokeWidth={3} />;
-    if (value === false) return <X size={14} className="text-stone-300 mx-auto" />;
-    return <span className="text-[10px] font-bold text-stone-700">{value}</span>;
+  const includes = (row) => {
+    const v = isPro ? row.premium : (row.premium === 'pro' ? false : row.premium);
+    return v !== false;
   };
-
-  const renderFreeCell = (value) => {
-    if (value === true) return <Check size={14} className="text-stone-400 mx-auto" />;
-    if (value === false) return <X size={14} className="text-stone-300 mx-auto" />;
-    if (value === 'pro') return <X size={14} className="text-stone-300 mx-auto" />;
-    return <span className="text-[10px] font-bold text-stone-500">{value}</span>;
+  const renderValue = (row) => {
+    const v = isPro ? row.premium : (row.premium === 'pro' ? false : row.premium);
+    if (v === true || v === 'pro') return null;
+    return <span className="text-[10px] font-bold text-emerald-600">{v}</span>;
   };
 
   return (
@@ -309,45 +306,41 @@ export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgra
         {effPlan === 'free' && (
           <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 text-[10px] font-bold">
             <AlertCircle size={12} />
-            Essai terminé — Premium pour tout débloquer
+            Essai terminé — passez Premium pour tout débloquer
           </div>
         )}
       </div>
 
       <div className="overflow-y-auto flex-1">
-        <table className="w-full text-xs">
-          <thead className={`sticky top-0 ${theme.dk ? 'bg-zinc-900' : 'bg-white'} border-b ${theme.bd}`}>
-            <tr>
-              <th className="text-left p-3 font-black text-[10px] uppercase text-stone-400 tracking-wider">Ce que vous obtenez</th>
-              <th className="p-3 font-black text-[10px] uppercase text-stone-400 tracking-wider w-16">Gratuit</th>
-              <th className={`p-3 font-black text-[10px] uppercase tracking-wider w-20 ${isPro ? 'text-indigo-500' : 'text-emerald-500'}`}>
-                {planLabel}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+        <div className={`p-5 ${theme.dk ? 'bg-zinc-900' : 'bg-white'}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.15em] ${theme.mt} mb-4`}>
+            Tout ce que vous débloquez
+          </p>
+          <div className="space-y-5">
             {PLAN_FEATURES.map((section) => {
               const showSection = !section.section.startsWith('Pro') || isPro;
               if (!showSection) return null;
+              const rows = section.rows.filter(includes);
+              if (rows.length === 0) return null;
               return (
-                <React.Fragment key={section.section}>
-                  <tr className={theme.dk ? 'bg-zinc-800/40' : 'bg-stone-50'}>
-                    <td colSpan={3} className={`p-2 px-3 text-[10px] font-black uppercase tracking-wider ${isPro ? 'text-indigo-500' : 'text-emerald-600'}`}>
-                      {section.section}
-                    </td>
-                  </tr>
-                  {section.rows.map((row, ri) => (
-                    <tr key={ri} className={`border-b ${theme.bd}`}>
-                      <td className={`p-2.5 px-3 ${theme.tx} text-[11px]`}>{row.label}</td>
-                      <td className="p-2.5 text-center">{renderFreeCell(row.free)}</td>
-                      <td className="p-2.5 text-center">{renderCell(isPro ? row.premium : (row.premium === 'pro' ? false : row.premium))}</td>
-                    </tr>
-                  ))}
-                </React.Fragment>
+                <div key={section.section}>
+                  <p className={`text-[10px] font-black uppercase tracking-[0.15em] mb-2 ${isPro ? 'text-indigo-500' : 'text-emerald-600'}`}>
+                    {section.section}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {rows.map((row, ri) => (
+                      <li key={ri} className="flex items-start gap-2 text-xs">
+                        <Check size={14} className={`mt-0.5 flex-shrink-0 ${isPro ? 'text-indigo-500' : 'text-emerald-500'}`} strokeWidth={3} />
+                        <span className={`flex-1 ${theme.tx}`}>{row.label}</span>
+                        {renderValue(row)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
       <div className={`p-4 border-t ${theme.bd} space-y-2`}>

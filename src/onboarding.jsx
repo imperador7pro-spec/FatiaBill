@@ -673,7 +673,7 @@ function Step4Recap({ theme, form }) {
       <div className={`p-4 rounded-2xl ${theme.dk ? 'bg-zinc-800/50' : 'bg-stone-100'}`}>
         <p className={`text-xs ${theme.tx} font-bold mb-1`}>🎁 Prochaine étape</p>
         <p className={`text-xs ${theme.mt} leading-relaxed`}>
-          Vous démarrez gratuitement avec accès à toutes les bases. Vous pourrez passer à Premium quand vous voulez débloquer le coach IA illimité, les leçons avancées et le scanner de factures.
+          Vous démarrez avec 14 jours d'essai gratuit, sans carte bancaire — tout est débloqué. Au terme de l'essai, vous choisissez la formule Premium qui vous correspond (Privé 9 CHF/mois ou Pro 29 CHF/mois) ou vous vous arrêtez là, sans engagement.
         </p>
       </div>
     </>
