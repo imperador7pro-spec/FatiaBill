@@ -346,7 +346,7 @@ export function UpgradeModal({ theme, mode, effPlan, trialLeft, onClose, onUpgra
       <div className={`p-4 border-t ${theme.bd} space-y-2`}>
         <button
           onClick={() => { onUpgrade(); onClose(); }}
-          className={`w-full py-3.5 text-white font-black rounded-2xl text-sm shadow-lg transition-transform hover:scale-[1.02] ${isPro ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
+          className={`plausible-event-name=Upgrade+Started plausible-event-plan=${isPro ? 'Pro' : 'Prive'} w-full py-3.5 text-white font-black rounded-2xl text-sm shadow-lg transition-transform hover:scale-[1.02] ${isPro ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-gradient-to-r from-emerald-600 to-teal-600'}`}
         >
           Activer Premium {planLabel} · {price} CHF/mois
         </button>

@@ -13,6 +13,8 @@ import { getTheme } from './theme.js';
 import { computeFinance, computeGoalProjection } from './finance.js';
 import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
 import { Landing } from './landing.jsx';
+import { track, getAttribution } from './analytics.js';
+import { supabase } from './supabase.js';
 import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
@@ -192,6 +194,7 @@ export default function App() {
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('success') === 'true') {
+      track('Upgrade Completed');
       setTimeout(async () => {
         const u = await auth.getUser();
         if (u) {
@@ -199,6 +202,10 @@ export default function App() {
           if (p) setPlan(p.plan || 'premium');
         }
       }, 2000);
+      window.history.replaceState({}, '', '/');
+    }
+    if (params.get('canceled') === 'true') {
+      track('Upgrade Canceled');
       window.history.replaceState({}, '', '/');
     }
 
@@ -239,6 +246,19 @@ export default function App() {
     if (!error && data?.user) {
       setUser(data.user);
       await loadAllUserData(data.user);
+
+      // Persist first-touch attribution so we can credit the signup back
+      // to the campaign that drove the visit (jersey ad, partner referral, etc.)
+      const attribution = getAttribution();
+      if (attribution) {
+        supabase.from('profiles').update({ attribution }).eq('id', data.user.id).then(() => {});
+      }
+
+      track('Signup', {
+        source: attribution?.utm_source || 'direct',
+        campaign: attribution?.utm_campaign || '',
+      });
+
       // Fire welcome email — non-blocking, idempotent server-side
       auth.getAccessToken().then((token) => {
         if (!token) return;

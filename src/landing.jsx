@@ -81,7 +81,7 @@ function TopBar({ t, darkMode, onToggleDark, onSignUp, onSignIn }) {
           <button onClick={onSignIn} className={`text-xs font-bold px-3 py-1.5 ${t.mt} hover:${t.tx}`}>
             Se connecter
           </button>
-          <button onClick={onSignUp} className={`text-xs font-bold px-4 py-2 rounded-full ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} hover:opacity-90 transition-opacity flex items-center gap-1.5`}>
+          <button onClick={onSignUp} className={`plausible-event-name=CTA+Click plausible-event-location=TopBar text-xs font-bold px-4 py-2 rounded-full ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} hover:opacity-90 transition-opacity flex items-center gap-1.5`}>
             Ouvrir mon compte <ArrowRight size={12} />
           </button>
         </div>
@@ -108,7 +108,7 @@ function Hero({ t, onSignUp }) {
             FatiaBill comprend vos comptes suisses, prévoit vos fins de mois et vous coache au quotidien — sans jamais vendre vos données.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mt-9">
-            <button onClick={onSignUp} className={`px-6 py-3.5 ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} font-bold rounded-full text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform`}>
+            <button onClick={onSignUp} className={`plausible-event-name=CTA+Click plausible-event-location=Hero px-6 py-3.5 ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} font-bold rounded-full text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform`}>
               Ouvrir mon compte <ArrowRight size={14} />
             </button>
             <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className={`px-6 py-3.5 font-bold text-sm rounded-full border ${t.bd} ${t.tx} flex items-center justify-center gap-2 ${t.dark ? 'hover:bg-zinc-900' : 'hover:bg-zinc-50'} transition-colors`}>
@@ -327,7 +327,7 @@ function CoachIA({ t, onSignUp }) {
                 <button
                   key={q}
                   onClick={onSignUp}
-                  className="w-full text-left flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 transition-all text-xs"
+                  className="plausible-event-name=CTA+Click plausible-event-location=CoachIA+Suggestion w-full text-left flex items-center justify-between px-4 py-3 rounded-xl border border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900 transition-all text-xs"
                 >
                   <span>{q}</span>
                   <ArrowRight size={12} className="text-zinc-500" />
@@ -424,7 +424,7 @@ function HowItWorks({ t, onSignUp }) {
         </div>
 
         <div className="text-center mt-12">
-          <button onClick={onSignUp} className={`inline-flex items-center gap-2 px-6 py-3.5 ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} font-bold rounded-full text-sm hover:scale-[1.02] transition-transform`}>
+          <button onClick={onSignUp} className={`plausible-event-name=CTA+Click plausible-event-location=HowItWorks inline-flex items-center gap-2 px-6 py-3.5 ${t.dark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'} font-bold rounded-full text-sm hover:scale-[1.02] transition-transform`}>
             Commencer maintenant <ArrowRight size={14} />
           </button>
         </div>
@@ -609,7 +609,7 @@ function SOSPoursuite({ t, onSignUp }) {
                 <Bullet t={t} text="Coach IA détecte les signaux et oriente vers les bonnes ressources" />
                 <Bullet t={t} text="Pour les Pro : article 725 CO, sursis concordataire, restructuration" />
               </div>
-              <button onClick={onSignUp} className="mt-7 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition-colors">
+              <button onClick={onSignUp} className="plausible-event-name=CTA+Click plausible-event-location=SOS+Poursuite mt-7 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition-colors">
                 Voir la vue SOS Poursuite <ArrowRight size={14} />
               </button>
             </div>
@@ -724,7 +724,7 @@ function Pricing({ t, onSignUp }) {
               </ul>
               <button
                 onClick={onSignUp}
-                className={`w-full py-3 rounded-full font-bold text-sm flex items-center justify-center gap-1.5 transition-all ${
+                className={`plausible-event-name=CTA+Click plausible-event-location=Pricing+${p.highlighted ? 'Prive' : 'Pro'} w-full py-3 rounded-full font-bold text-sm flex items-center justify-center gap-1.5 transition-all ${
                   p.highlighted
                     ? 'bg-emerald-500 hover:bg-emerald-400 text-zinc-900'
                     : `border ${t.bd} ${t.tx} ${t.dark ? 'hover:bg-zinc-800' : 'hover:bg-zinc-100'}`
