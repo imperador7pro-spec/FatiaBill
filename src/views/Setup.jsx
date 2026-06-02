@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   User, Building2, Wallet, Plus, Trash2, Save, Check, AlertCircle,
-  ShieldAlert, Download, Trash, X,
+  ShieldAlert, Download, Trash, X, Crown, ExternalLink,
 } from 'lucide-react';
 import {
   CANTONS, NATIONALITY_OPTIONS, CIVIL_STATUS_OPTIONS,
@@ -16,13 +16,14 @@ const isValidIBAN = (iban) => {
   return /^CH\d{19}$/.test(clean) || /^LI\d{19}$/.test(clean);
 };
 
-export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfile, onAccountDeleted }) {
+export function Setup({ theme, mode, profile, effPlan, expenses, setExpenses, onSaveProfile, onAccountDeleted }) {
   const [section, setSection] = useState('profile');
 
   const sections = [
     { id: 'profile', label: 'Mon profil', icon: User, available: true },
     { id: 'business', label: 'Mon entreprise', icon: Building2, available: mode === 'pro' },
     { id: 'expenses', label: 'Charges fixes', icon: Wallet, available: true },
+    { id: 'subscription', label: 'Abonnement', icon: Crown, available: true },
     { id: 'data', label: 'Mes données', icon: ShieldAlert, available: true },
   ].filter((s) => s.available);
 
@@ -58,10 +59,93 @@ export function Setup({ theme, mode, profile, expenses, setExpenses, onSaveProfi
       {section === 'expenses' && (
         <ExpensesSection theme={theme} expenses={expenses} setExpenses={setExpenses} />
       )}
+      {section === 'subscription' && (
+        <SubscriptionSection theme={theme} effPlan={effPlan} profile={profile} />
+      )}
       {section === 'data' && (
         <DataRightsSection theme={theme} onAccountDeleted={onAccountDeleted} />
       )}
     </div>
+  );
+}
+
+function SubscriptionSection({ theme, effPlan, profile }) {
+  const toast = useToast();
+  const [opening, setOpening] = useState(false);
+
+  const openPortal = async () => {
+    setOpening(true);
+    try {
+      const token = await auth.getAccessToken();
+      if (!token) throw new Error('Session expirée — reconnectez-vous');
+      const r = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.url) throw new Error(d.error || `Erreur ${r.status}`);
+      window.location.href = d.url;
+    } catch (e) {
+      toast.error(e?.message || 'Impossible d\'ouvrir le portail');
+      setOpening(false);
+    }
+  };
+
+  const isPremium = effPlan === 'premium';
+  const isTrial = effPlan === 'trial';
+
+  return (
+    <Card theme={theme} title="Mon abonnement">
+      {isPremium && (
+        <>
+          <div className={`p-3 rounded-2xl border mb-3 flex items-center gap-3 ${theme.dk ? 'bg-emerald-900/20 border-emerald-800' : 'bg-emerald-50 border-emerald-200'}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-600 text-white flex-shrink-0`}>
+              <Crown size={17} />
+            </div>
+            <div>
+              <p className={`text-[10px] font-black uppercase ${theme.dk ? 'text-emerald-400' : 'text-emerald-700'}`}>Statut</p>
+              <p className={`font-black text-sm ${theme.tx}`}>Premium actif</p>
+            </div>
+          </div>
+          <p className={`text-xs ${theme.mt} mb-3 leading-relaxed`}>
+            Gérez votre abonnement, modifiez votre moyen de paiement, téléchargez vos factures
+            ou résiliez à tout moment depuis le portail sécurisé Stripe.
+          </p>
+          <button
+            onClick={openPortal}
+            disabled={opening}
+            className="w-full py-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {opening ? 'Ouverture...' : <>Ouvrir le portail Stripe <ExternalLink size={14} /></>}
+          </button>
+          <p className={`text-[10px] ${theme.mt} mt-3 italic`}>
+            Conformément à nos CGU, la résiliation prend effet à la fin de la période payée.
+            Vos données restent ensuite consultables et exportables en lecture seule.
+          </p>
+        </>
+      )}
+      {isTrial && (
+        <div className={`p-3 rounded-2xl border ${theme.dk ? 'bg-indigo-900/20 border-indigo-800' : 'bg-indigo-50 border-indigo-200'}`}>
+          <p className={`text-[10px] font-black uppercase mb-1 ${theme.dk ? 'text-indigo-400' : 'text-indigo-700'}`}>Période d'essai</p>
+          <p className={`font-black text-sm ${theme.tx} mb-2`}>Aucun paiement en cours</p>
+          <p className={`text-xs ${theme.mt} leading-relaxed`}>
+            Vous êtes en essai gratuit. Aucune carte bancaire n'a été enregistrée.
+            Pour souscrire Premium et continuer après l'essai, utilisez le bouton « Passer Premium »
+            depuis n'importe quelle vue de l'app.
+          </p>
+        </div>
+      )}
+      {!isPremium && !isTrial && (
+        <div className={`p-3 rounded-2xl border ${theme.dk ? 'bg-zinc-900 border-zinc-800' : 'bg-stone-50 border-stone-200'}`}>
+          <p className={`text-[10px] font-black uppercase mb-1 ${theme.mt}`}>Statut</p>
+          <p className={`font-black text-sm ${theme.tx} mb-2`}>Aucun abonnement actif</p>
+          <p className={`text-xs ${theme.mt} leading-relaxed`}>
+            Votre compte est en lecture seule. Réactivez Premium pour débloquer le coach IA,
+            l'ajout de transactions et les fonctionnalités avancées.
+          </p>
+        </div>
+      )}
+    </Card>
   );
 }
 
