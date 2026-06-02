@@ -4,6 +4,7 @@ import {
   Upload, X, AlertCircle, Edit3, FileText,
 } from 'lucide-react';
 import { EXPENSE_CATEGORIES } from '../data.js';
+import { EmptyState } from '../components/EmptyState.jsx';
 
 const MAX_DIMENSION = 1280;
 const JPEG_QUALITY = 0.85;
@@ -218,6 +219,17 @@ export function Scanner({
             </p>
           )}
         </div>
+      )}
+
+      {documents.length === 0 && !scanResult && !scanning && (
+        <EmptyState
+          theme={theme}
+          icon={Archive}
+          accent="indigo"
+          title="Aucun document archivé"
+          description="Scannez votre 1ère facture, reçu ou justificatif. L'IA extrait automatiquement le montant, la date, le fournisseur et la TVA — vous validez, on archive."
+          hint="Astuce : photographiez en mode portrait, fond contrasté, pas de flash direct"
+        />
       )}
 
       {documents.length > 0 && (

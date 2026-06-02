@@ -15,6 +15,7 @@ import { AuthLoadingScreen, AuthScreen } from './auth.jsx';
 import { Landing } from './landing.jsx';
 import { track, getAttribution } from './analytics.js';
 import { supabase } from './supabase.js';
+import { FirstWinModal, hasSeenFirstWin, markFirstWinSeen } from './firstWin.jsx';
 import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
@@ -305,7 +306,11 @@ export default function App() {
     if (!wasAlreadyPremium && !profile?.trial_started_at) setPlan('trial');
     setOnboardingDone(true);
     setView(payload.mode === 'pro' ? 'pro_dashboard' : 'dashboard');
-    if (payload.mode === 'private') setTimeout(() => setModal('sal'), 400);
+    if (!hasSeenFirstWin()) {
+      setTimeout(() => setModal('first_win'), 500);
+    } else if (payload.mode === 'private' && !(payload.salary > 0)) {
+      setTimeout(() => setModal('sal'), 400);
+    }
   };
 
   const handleUpgrade = async () => {
@@ -835,6 +840,15 @@ export default function App() {
           />
         )}
       </ModalShell>
+      {modal === 'first_win' && (
+        <FirstWinModal
+          theme={theme}
+          profile={profile}
+          mode={mode}
+          onClose={() => { markFirstWinSeen(); setModal(null); }}
+          onOpenCoach={() => { markFirstWinSeen(); setView(mode === 'pro' ? 'ai_pro' : 'ai'); }}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Receipt, TrendingUp, CheckCircle2, Clock, Trash2 } from 'lucide-react';
+import { EmptyState } from '../components/EmptyState.jsx';
 
 const FILTERS = [
   { k: 'ALL', l: 'Tout' },
@@ -35,10 +36,18 @@ export function Transactions({ theme, transactions, filter, onChangeFilter, onAd
         ))}
       </div>
       {filtered.length === 0 && (
-        <div className={`p-8 text-center rounded-2xl border border-dashed ${theme.bd} ${theme.mt}`}>
-          <Receipt size={28} className="mx-auto mb-2 opacity-20" />
-          <p className="font-bold text-xs">Vide</p>
-        </div>
+        <EmptyState
+          theme={theme}
+          icon={Receipt}
+          accent="indigo"
+          title={filter === 'ALL' ? 'Aucune transaction' : filter === 'PENDING' ? 'Aucune attente' : filter === 'IN' ? 'Aucune recette' : 'Aucune dépense'}
+          description={filter === 'ALL'
+            ? 'Ajoutez votre 1ère pièce — recette client, dépense pro ou justificatif. Tout reste organisé par catégorie et statut.'
+            : 'Changez de filtre ou ajoutez une nouvelle pièce.'}
+          ctaLabel="Ajouter une pièce"
+          onCta={onAddTx}
+          hint={filter === 'ALL' ? 'Astuce : utilisez le Scanner pour importer une facture en photo' : null}
+        />
       )}
       {filtered.map((t) => (
         <div
