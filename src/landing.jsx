@@ -646,21 +646,19 @@ function Bullet({ t, text }) {
 function Pricing({ t, onSignUp }) {
   const plans = [
     {
-      tag: 'Essentiel',
-      name: 'Découverte',
-      price: '0',
-      sub: 'Pour comprendre vos finances. Pour toujours.',
-      features: ['Dashboard budget', '5 charges fixes · 2 objectifs', '3 messages IA / mois', 'Académie de base', 'Simulateur 26 cantons'],
-      cta: 'Commencer gratuitement',
-      variant: 'light',
-    },
-    {
       tag: 'Le plus choisi',
       name: 'Privé Premium',
       price: '9',
       sub: 'Pour reprendre le contrôle, sans y penser.',
-      features: ['Tout du Gratuit, illimité', 'Académie complète (40 leçons)', 'Coach IA contextuel illimité', 'Décomposition brut → net', 'Comparateur 3A', 'SOS Poursuite complet'],
-      cta: 'Essai 14 jours',
+      features: [
+        'Académie complète (40 leçons)',
+        'Coach IA contextuel illimité',
+        'Décomposition brut → net',
+        'Simulateur 26 cantons',
+        'Comparateur 3A',
+        'SOS Poursuite complet',
+      ],
+      cta: 'Démarrer l\'essai 14 jours',
       variant: 'dark',
       highlighted: true,
     },
@@ -669,8 +667,15 @@ function Pricing({ t, onSignUp }) {
       name: 'Pro Premium',
       price: '29',
       sub: 'Pour ceux qui facturent et gèrent une activité.',
-      features: ['Tout du Privé', 'Scanner factures IA', 'QR-factures + envoi email', 'Académie Pro (26 modules)', 'Recouvrement & article 725 CO', 'Coach business IA'],
-      cta: 'Essai 14 jours',
+      features: [
+        'Tout du Privé',
+        'Scanner factures IA',
+        'QR-factures + envoi email',
+        'Académie Pro (26 modules)',
+        'Recouvrement & article 725 CO',
+        'Coach business IA',
+      ],
+      cta: 'Démarrer l\'essai 14 jours',
       variant: 'light',
     },
   ];
@@ -684,9 +689,12 @@ function Pricing({ t, onSignUp }) {
             Un abonnement.<br />
             <span className={`italic ${ACCENT}`}>Aucun frais caché</span>.
           </h2>
+          <p className={`text-sm mt-4 max-w-xl ${t.mt}`}>
+            14 jours d'essai gratuit sur les deux formules — sans carte bancaire, annulable en 1 clic.
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {plans.map((p) => (
             <div
               key={p.name}
