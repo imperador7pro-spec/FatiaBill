@@ -40,10 +40,18 @@ export function TopNav({ theme, mode, xp, streak, effPlan, trialLeft, trialExpir
               <Crown size={11} />Premium
             </button>
           )}
-          <button onClick={onToggleDark} className={`p-2 rounded-full ${theme.dk ? 'text-yellow-400 bg-zinc-900' : 'text-stone-500 bg-stone-100'}`}>
+          <button
+            onClick={onToggleDark}
+            aria-label={theme.dk ? 'Passer en thème clair' : 'Passer en thème sombre'}
+            className={`p-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${theme.dk ? 'text-yellow-400 bg-zinc-900' : 'text-stone-500 bg-stone-100'}`}
+          >
             {theme.dk ? <Sun size={15} /> : <Moon size={15} />}
           </button>
-          <button onClick={onSignOut} className={`p-2 rounded-full ${theme.dk ? 'text-zinc-500 bg-zinc-900' : 'text-stone-400 bg-stone-100'}`}>
+          <button
+            onClick={onSignOut}
+            aria-label="Se déconnecter"
+            className={`p-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${theme.dk ? 'text-zinc-500 bg-zinc-900' : 'text-stone-400 bg-stone-100'}`}
+          >
             <LogOut size={15} />
           </button>
         </div>
@@ -128,7 +136,9 @@ export function TabBar({ theme, mode, view, onChangeView }) {
           <button
             key={key}
             onClick={() => onChangeView(key)}
-            className={`flex-1 min-w-[60px] py-2 rounded-xl font-black text-[9px] uppercase flex flex-col items-center justify-center gap-0.5 transition-all ${cls}`}
+            aria-label={key.replace(/_/g, ' ')}
+            aria-current={active ? 'page' : undefined}
+            className={`flex-1 min-w-[60px] py-2 rounded-xl font-black text-[9px] uppercase flex flex-col items-center justify-center gap-0.5 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-500 ${cls}`}
           >
             <Ic size={13} />
           </button>

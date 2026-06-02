@@ -4,10 +4,11 @@ import { Logo } from './logo.jsx';
 
 export function AuthLoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-50">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50" role="status" aria-live="polite">
       <div className="text-center">
-        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-stone-500 font-bold text-sm">Chargement...</p>
+        <Logo size="xl" className="mb-5 opacity-80" />
+        <div className="w-10 h-10 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+        <span className="sr-only">Chargement de votre espace FatiaBill</span>
       </div>
     </div>
   );
