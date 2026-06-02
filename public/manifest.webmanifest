@@ -1,0 +1,43 @@
+{
+  "name": "FatiaBill — Copilote Financier Suisse",
+  "short_name": "FatiaBill",
+  "description": "Copilote financier suisse. Budget, épargne, fiscalité cantonale, factures QR et coaching IA — pour particuliers et indépendants.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fafaf9",
+  "theme_color": "#10b981",
+  "lang": "fr-CH",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Coach IA",
+      "short_name": "Coach",
+      "description": "Discuter avec le coach financier",
+      "url": "/?view=ai",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Scanner facture",
+      "short_name": "Scanner",
+      "description": "Scanner une facture ou un reçu",
+      "url": "/?view=scanner",
+      "icons": [{ "src": "/favicon.svg", "sizes": "any" }]
+    }
+  ]
+}
