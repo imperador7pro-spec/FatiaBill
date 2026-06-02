@@ -69,10 +69,12 @@ export const INVESTMENT_PRODUCTS = [
 
 export const TRIAL_DAYS = 14;
 
+// Post-trial limits (no free forever tier — paywall after 14 days).
+// Existing data stays readable; adding new items is blocked.
 export const FREE_LIMITS = {
-  expenses: 5,
-  goals: 2,
-  ai: 3,
+  expenses: 0,
+  goals: 0,
+  ai: 0,
 };
 
 export const TRIAL_LIMITS = {

@@ -750,7 +750,7 @@ function FAQ({ t }) {
     { q: 'Faut-il une carte bancaire pour l\'essai ?', a: 'Non. Email + mot de passe, profil, et vous démarrez. La carte n\'arrive que si vous décidez de passer Premium après les 14 jours.' },
     { q: 'Où sont mes données ?', a: 'Hébergées en Europe (Supabase EU), conformes RGPD/LPD. Aucune revente, aucun partage. Vos scans IA passent par Anthropic (Claude) sans rétention. Vous pouvez supprimer votre compte à tout moment.' },
     { q: 'Pour qui FatiaBill est-il fait ?', a: 'Particuliers qui veulent maîtriser leur budget et leur fiscalité suisse, frontaliers, indépendant·es et petites Sàrl qui veulent un outil utile au quotidien — scan de factures, QR-bills, coach business — sans payer le prix d\'une suite comptable complète.' },
-    { q: 'Puis-je annuler à tout moment ?', a: 'Oui, depuis votre dashboard ou Stripe. Vous gardez l\'accès jusqu\'à la fin du mois payé, puis vous repassez en plan Gratuit avec accès à vos données historiques.' },
+    { q: 'Puis-je annuler à tout moment ?', a: 'Oui, depuis votre dashboard ou via Stripe. Vous gardez l\'accès Premium jusqu\'à la fin du mois payé. Ensuite, votre compte passe en lecture seule — vos données restent consultables et exportables, mais les actions (nouvelles transactions, coach IA, scanner, génération de factures) sont mises en pause jusqu\'à un éventuel retour Premium.' },
     { q: 'Comment FatiaBill aborde-t-il les dettes / poursuites ?', a: 'C\'est l\'un de nos différenciateurs majeurs. Une section dédiée "SOS Poursuite" guide pas à pas, oriente vers les services gratuits suisses (Caritas, CSP, Dettes Conseils Suisse), et le coach IA détecte automatiquement les signaux de difficulté financière pour répondre avec calme et ressources concrètes.' },
   ];
   return (

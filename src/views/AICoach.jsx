@@ -35,14 +35,14 @@ export function AICoach({ theme, mode, effPlan, aiUsed, aiLimit, messages, input
         <p className={`text-[10px] ${theme.mt}`}>
           {mode === 'pro' ? 'TVA · AVS · Stratégie · Entreprise' : 'Fiscalité · Épargne · Investissement'}
         </p>
-        {showQuotaBadge && !limitReached && (
+        {showQuotaBadge && !limitReached && aiLimit > 0 && (
           <div className={`inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-lg text-[10px] font-bold ${theme.dk ? 'bg-zinc-800 text-zinc-300' : 'bg-stone-100 text-stone-600'}`}>
-            <Sparkles size={11} /> {remaining}/{aiLimit} message{aiLimit > 1 ? 's' : ''} restant{remaining > 1 ? 's' : ''} ce mois · gratuit
+            <Sparkles size={11} /> {remaining}/{aiLimit} message{aiLimit > 1 ? 's' : ''} restant{remaining > 1 ? 's' : ''} ce mois
           </div>
         )}
         {showQuotaBadge && limitReached && (
           <button onClick={onUpgrade} className="inline-flex items-center gap-1 mt-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-            <Crown size={11} /> Quota gratuit épuisé · passer Premium
+            <Crown size={11} /> Essai terminé · passer Premium
           </button>
         )}
       </div>
