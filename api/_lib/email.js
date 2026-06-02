@@ -112,6 +112,82 @@ export async function sendPaymentReceiptEmail({ to, firstName, planLabel, amount
   });
 }
 
+export async function sendTrialEndingIn3DaysEmail({ to, firstName }) {
+  const name = escapeHtml(firstName || '');
+  const greeting = name ? `Bonjour ${name},` : 'Bonjour,';
+  const html = wrap('Plus que 3 jours d\'essai', `
+    <h1 style="font-size:20px;font-weight:900;margin:0 0 14px;">${greeting}</h1>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Petit rappel : il vous reste <strong>3 jours</strong> d'essai gratuit sur FatiaBill.
+      Si l'outil vous est utile, c'est le bon moment pour choisir votre formule Premium
+      (Privé 9 CHF/mois ou Pro 29 CHF/mois) — vos données et votre configuration sont conservées.
+    </p>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Sans souscription au terme de l'essai, votre compte passera en lecture seule :
+      vos données restent consultables et exportables, mais les actions productives
+      (coach IA, scanner, génération de factures) seront mises en pause.
+    </p>
+    ${btn('Activer Premium', `${APP_URL}?upgrade=1`)}
+    <p style="font-size:12px;color:#78716c;margin:22px 0 0;line-height:1.6;">
+      Une question ou un blocage ? Répondez à cet email — on lit tout.
+    </p>
+  `);
+  return send({ to, subject: 'Plus que 3 jours d\'essai FatiaBill', html });
+}
+
+export async function sendTrialEndingTomorrowEmail({ to, firstName }) {
+  const name = escapeHtml(firstName || '');
+  const greeting = name ? `Bonjour ${name},` : 'Bonjour,';
+  const html = wrap('Votre essai se termine demain', `
+    <h1 style="font-size:20px;font-weight:900;margin:0 0 14px;">${greeting}</h1>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Votre essai gratuit FatiaBill se termine <strong>demain</strong>.
+      Pour conserver l'accès complet (coach IA, scanner factures, simulateur cantonal, académie),
+      activez Premium en 1 clic.
+    </p>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Rappel des formules :
+    </p>
+    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0 0 18px;color:#44403c;">
+      <li><strong>Privé Premium · 9 CHF/mois</strong> — académie, coach IA contextuel, brut→net, simulateur 26 cantons, SOS Poursuite</li>
+      <li><strong>Pro Premium · 29 CHF/mois</strong> — tout du Privé + scanner factures IA, QR-factures, recouvrement, coach business</li>
+    </ul>
+    ${btn('Activer Premium maintenant', `${APP_URL}?upgrade=1`)}
+    <p style="font-size:12px;color:#78716c;margin:22px 0 0;line-height:1.6;">
+      Annulable à tout moment depuis Réglages · Aucun engagement · Paiement Stripe sécurisé.
+    </p>
+  `);
+  return send({ to, subject: 'Votre essai FatiaBill se termine demain', html });
+}
+
+export async function sendTrialExpiredEmail({ to, firstName }) {
+  const name = escapeHtml(firstName || '');
+  const greeting = name ? `Bonjour ${name},` : 'Bonjour,';
+  const html = wrap('Essai terminé — vos données sont conservées', `
+    <h1 style="font-size:20px;font-weight:900;margin:0 0 14px;">${greeting}</h1>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Votre essai gratuit FatiaBill est terminé. Comme convenu, aucun prélèvement n'a été effectué —
+      nous n'avons jamais demandé votre carte bancaire.
+    </p>
+    <p style="font-size:14px;line-height:1.6;margin:0 0 14px;">
+      Votre compte est désormais en <strong>lecture seule</strong> :
+    </p>
+    <ul style="font-size:13px;line-height:1.7;padding-left:20px;margin:0 0 18px;color:#44403c;">
+      <li>✅ Vos données restent <strong>consultables</strong> et <strong>exportables</strong> à tout moment</li>
+      <li>⏸️ Les actions productives (nouvelles transactions, coach IA, scanner) sont mises en pause</li>
+      <li>🔓 Activez Premium en 1 clic pour tout débloquer — vos données vous attendent</li>
+    </ul>
+    ${btn('Activer Premium', `${APP_URL}?upgrade=1`)}
+    <p style="font-size:12px;color:#78716c;margin:22px 0 0;line-height:1.6;">
+      Vous n'êtes plus convaincu·e ? Pas de souci, vous pouvez exporter toutes vos données
+      (RGPD art. 20) depuis Réglages, ou supprimer votre compte définitivement.
+      <br><br>
+      Une remarque sur ce qui n'a pas fonctionné ? Répondez à cet email — votre retour nous aide énormément.
+    </p>
+  `);
+  return send({ to, subject: 'Essai FatiaBill terminé — vos données vous attendent', html });
+}
+
 export async function sendSubscriptionCanceledEmail({ to, firstName, endsAt }) {
   const name = escapeHtml(firstName || '');
   const greeting = name ? `Bonjour ${name},` : 'Bonjour,';
