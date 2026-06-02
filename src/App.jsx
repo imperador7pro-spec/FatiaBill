@@ -16,6 +16,7 @@ import { Landing } from './landing.jsx';
 import { track, getAttribution } from './analytics.js';
 import { supabase } from './supabase.js';
 import { FirstWinModal, hasSeenFirstWin, markFirstWinSeen } from './firstWin.jsx';
+import { ReactivationScreen, shouldShowReactivation, markReactivationShown } from './reactivation.jsx';
 import { CookieBanner } from './cookieBanner.jsx';
 import { TopNav, TabBar } from './nav.jsx';
 import {
@@ -163,6 +164,17 @@ export default function App() {
     setDocuments(docs);
     setDataLoaded(true);
   }, []);
+
+  // Reactivation: when an expired-trial user comes back, show a once-per-session
+  // reactivation screen with their accumulated data and one-click upgrade.
+  useEffect(() => {
+    if (!dataLoaded || !profile || !onboardingDone) return;
+    const expired = profile.plan !== 'premium' && profile.trial_started_at
+      && new Date(profile.trial_ends_at) <= new Date();
+    if (expired && shouldShowReactivation()) {
+      setModal('reactivation');
+    }
+  }, [dataLoaded, profile, onboardingDone]);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -412,6 +424,10 @@ export default function App() {
   };
 
   const saveTransaction = (form) => {
+    if (effPlan === 'free') {
+      setModal('upgrade');
+      return;
+    }
     const tx = {
       id: db.newId(),
       ...form,
@@ -726,7 +742,7 @@ export default function App() {
             transactions={transactions}
             filter={txFilter}
             onChangeFilter={setTxFilter}
-            onAddTx={() => setModal('tx')}
+            onAddTx={() => setModal(effPlan === 'free' ? 'upgrade' : 'tx')}
             onToggleStatus={toggleTransactionStatus}
             onDeleteTx={deleteTransaction}
           />
@@ -847,6 +863,24 @@ export default function App() {
           mode={mode}
           onClose={() => { markFirstWinSeen(); setModal(null); }}
           onOpenCoach={() => { markFirstWinSeen(); setView(mode === 'pro' ? 'ai_pro' : 'ai'); }}
+        />
+      )}
+      {modal === 'reactivation' && (
+        <ReactivationScreen
+          theme={theme}
+          profile={profile}
+          mode={mode}
+          expensesCount={expenses.length}
+          transactionsCount={transactions.length}
+          goalsCount={goals.length}
+          documentsCount={documents.length}
+          onUpgrade={() => { setModal(null); handleUpgrade(); }}
+          onContinue={() => setModal(null)}
+          onExport={() => {
+            markReactivationShown();
+            setModal(null);
+            setView('setup');
+          }}
         />
       )}
     </div>
