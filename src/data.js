@@ -38,7 +38,7 @@ export const GOAL_PRESETS = [
 
 export const INVESTMENT_PRODUCTS = [
   {
-    n: '3A Titres', r: 0.05, ri: 'Modéré', rc: 'text-amber-600 bg-amber-100', mx: 7056,
+    n: '3A Titres', r: 0.05, ri: 'Modéré', rc: 'text-amber-600 bg-amber-100', mx: 7258,
     d: 'Enveloppe fiscale + fonds.',
     p: ['Avantage fiscal', '4-7%/an', 'Composés'],
     c: ['Risque perte', 'Bloqué', 'Frais'],
@@ -52,11 +52,11 @@ export const INVESTMENT_PRODUCTS = [
     lv: '500/mois à 7% = ~121k en 10 ans.',
   },
   {
-    n: '3A Compte', r: 0.015, ri: 'Très faible', rc: 'text-emerald-600 bg-emerald-100', mx: 7056,
+    n: '3A Compte', r: 0.015, ri: 'Très faible', rc: 'text-emerald-600 bg-emerald-100', mx: 7258,
     d: 'Déductible. Garanti mais bloqué.',
     p: ['Impôts réduits', 'Garanti', 'Discipline'],
     c: ['Bloqué', 'Faible', 'Plafonné'],
-    lv: 'Taux 30% → 7056 = ~2100 économisés.',
+    lv: 'Taux 30% → 7258 = ~2177 économisés.',
   },
   {
     n: 'Compte Épargne', r: 0.0075, ri: 'Aucun', rc: 'text-emerald-600 bg-emerald-100', mx: null,

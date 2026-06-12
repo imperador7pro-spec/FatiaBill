@@ -22,8 +22,9 @@ function fmtCHF(n) {
   return new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
 }
 
-export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
+export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade, onTrackReceivable }) {
   const toast = useToast();
+  const [tracked, setTracked] = useState(false);
   const today = new Date().toISOString().split('T')[0];
   const defaultDue = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
 
@@ -381,6 +382,25 @@ export function Invoices({ theme, profile, effPlan, isPremium, onUpgrade }) {
         <p className={`text-[10px] text-center ${theme.mt}`}>
           Complétez IBAN + adresses + au moins une ligne pour générer.
         </p>
+      )}
+
+      {canGenerate && onTrackReceivable && (
+        <button
+          onClick={() => {
+            onTrackReceivable({
+              amount: total,
+              label: `Facture ${meta.invoice_number} — ${debtor.name}`,
+              date: meta.invoice_date,
+            });
+            setTracked(true);
+          }}
+          disabled={tracked}
+          className={`w-full py-3 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${tracked
+            ? 'bg-emerald-500/10 text-emerald-600 cursor-default'
+            : `${theme.sf} ${theme.tx} hover:opacity-80`}`}
+        >
+          {tracked ? <><Check size={14} /> Suivie dans vos créances</> : <><Plus size={14} /> Suivre comme créance à relancer</>}
+        </button>
       )}
 
       {sendModal && (

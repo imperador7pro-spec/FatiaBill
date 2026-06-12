@@ -1,4 +1,4 @@
-// Swiss social charges + LAMal — 2025 reference values.
+// Swiss social charges + LAMal — 2026 reference values.
 // Used both by the salary-breakdown view and by the canton simulator to
 // compute a *real* monthly net (tax + LAMal included).
 //
@@ -9,7 +9,7 @@
 import { estimateTax } from './cantonTax.js';
 
 // ─────────────────────────────────────────────────────
-// AVS / AI / APG — 2025
+// AVS / AI / APG — 2026
 // 10.6% total (5.3% employee + 5.3% employer), no cap.
 // Self-employed: dégressif from 5.371% to 10.0% between 9'800 and 60'000,
 // 10% above. We model the linear interpolation.
@@ -27,7 +27,7 @@ export function avsSelfEmployedRate(annualIncome) {
 }
 
 // ─────────────────────────────────────────────────────
-// AC — Assurance chômage 2025
+// AC — Assurance chômage 2026 (ceiling unchanged vs 2025)
 // 1.1% on salary up to 148'200 (tranche 1), 0.5% above (tranche 2).
 // ─────────────────────────────────────────────────────
 
@@ -40,18 +40,18 @@ export function acEmployeeContribution(annualSalary) {
 }
 
 // ─────────────────────────────────────────────────────
-// LPP — 2nd pilier 2025 (legal minimum)
-// Salaire coordonné = salaire AVS − 26'460 (déduction de coordination)
-// plafonné à 88'200 (salaire LPP max).
-// Min annual salary to be insured: 22'050.
+// LPP — 2nd pilier 2026 (legal minimum)
+// Salaire coordonné = salaire AVS − 26'460 (déduction de coordination, unchanged)
+// plafonné à 90'720 (limite supérieure du salaire annuel LPP, 2026).
+// Min annual salary to be insured (seuil d'entrée): 22'680.
 // Cotisation rates by age (employee + employer combined; at least 50% by employer):
 //   25-34: 7%, 35-44: 10%, 45-54: 15%, 55-65: 18%
 // We model employee share = HALF the total (most generous caisses pay more).
 // ─────────────────────────────────────────────────────
 
 const LPP_COORDINATION_DEDUCTION = 26460;
-const LPP_MAX_INSURED = 88200;
-const LPP_MIN_TO_INSURE = 22050;
+const LPP_MAX_INSURED = 90720;
+const LPP_MIN_TO_INSURE = 22680;
 
 export function lppCoordinatedSalary(annualSalary) {
   if (annualSalary < LPP_MIN_TO_INSURE) return 0;
@@ -91,28 +91,30 @@ export function laaNpContribution(annualSalary) {
 
 // ─────────────────────────────────────────────────────
 // LAMal — average monthly premium by canton, adult, basic, franchise 300 CHF
-// Source: BAG/OFSP 2025 cantonal averages.
+// Base: BAG/OFSP cantonal averages, uplifted to 2026 by the announced national
+// average increase (+4.1% adult, +4.9% child; +4.4% all-categories). These remain
+// approximations — replace with the exact OFSP 2026 cantonal table when available.
 // Premium for an adult on the basic model. Reduce/increase by ±15% for
 // HMO/standard, ±30% for franchise 2500.
 // ─────────────────────────────────────────────────────
 
-export const LAMAL_ADULT_2025 = {
-  AG: 365, AI: 290, AR: 320, BE: 380, BL: 410, BS: 459, FR: 350, GE: 440,
-  GL: 305, GR: 330, JU: 405, LU: 340, NE: 410, NW: 295, OW: 290, SG: 320,
-  SH: 360, SO: 380, SZ: 305, TG: 320, TI: 410, UR: 300, VD: 410, VS: 395,
-  ZG: 295, ZH: 395,
+export const LAMAL_ADULT_2026 = {
+  AG: 380, AI: 300, AR: 335, BE: 395, BL: 425, BS: 480, FR: 365, GE: 460,
+  GL: 315, GR: 345, JU: 420, LU: 355, NE: 425, NW: 305, OW: 300, SG: 335,
+  SH: 375, SO: 395, SZ: 315, TG: 335, TI: 425, UR: 310, VD: 425, VS: 410,
+  ZG: 305, ZH: 410,
 };
 
-export const LAMAL_CHILD_2025 = {
-  AG: 100, AI: 80, AR: 90, BE: 110, BL: 115, BS: 130, FR: 95, GE: 125,
-  GL: 85, GR: 92, JU: 115, LU: 95, NE: 115, NW: 82, OW: 80, SG: 90,
-  SH: 100, SO: 110, SZ: 85, TG: 90, TI: 120, UR: 82, VD: 115, VS: 110,
-  ZG: 82, ZH: 110,
+export const LAMAL_CHILD_2026 = {
+  AG: 105, AI: 85, AR: 95, BE: 115, BL: 120, BS: 135, FR: 100, GE: 130,
+  GL: 90, GR: 95, JU: 120, LU: 100, NE: 120, NW: 85, OW: 85, SG: 95,
+  SH: 105, SO: 115, SZ: 90, TG: 95, TI: 125, UR: 85, VD: 120, VS: 115,
+  ZG: 85, ZH: 115,
 };
 
 export function lamalAnnualForHousehold({ canton, civil_status, num_children }) {
-  const adult = LAMAL_ADULT_2025[canton] ?? 380;
-  const child = LAMAL_CHILD_2025[canton] ?? 100;
+  const adult = LAMAL_ADULT_2026[canton] ?? 395;
+  const child = LAMAL_CHILD_2026[canton] ?? 105;
   const adults = ['married', 'partnership'].includes(civil_status) ? 2 : 1;
   const kids = Math.max(0, num_children || 0);
   return (adult * adults + child * kids) * 12;

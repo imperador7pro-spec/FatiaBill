@@ -42,8 +42,8 @@ export const CGU = {
       title: '4. Formules et tarifs',
       paragraphs: [
         'FatiaBill propose deux formules d\'abonnement Premium :',
-        '**Privé Premium (9 CHF/mois)** — Pour les particuliers : académie complète (40 leçons), coach IA contextuel illimité, décomposition brut→net, simulateur 26 cantons, comparateur 3A, SOS Poursuite complet.',
-        '**Pro Premium (29 CHF/mois)** — Pour les indépendant·es et Sàrl : tout du Privé + scanner factures IA, génération QR-factures + envoi email, académie Pro (26 modules), suivi recouvrement et article 725 CO, coach business IA.',
+        '**Privé Premium (9 CHF/mois)** — Pour les particuliers : académie complète (45 leçons), coach IA contextuel illimité, décomposition brut→net, simulateur 26 cantons, comparateur 3A, SOS Poursuite complet.',
+        '**Pro Premium (29 CHF/mois)** — Pour les indépendant·es et Sàrl : tout du Privé + scanner factures IA, génération QR-factures + envoi email, académie Pro (32 leçons), suivi recouvrement et article 725 CO, coach business IA.',
         'Une période d\'**essai gratuit de 14 jours**, sans saisie de carte bancaire, est offerte à toute inscription sur l\'une ou l\'autre des formules. Pendant l\'essai, l\'ensemble des fonctionnalités de la formule choisie sont débloquées sans restriction. À l\'issue de l\'essai, le service Premium n\'est facturé que si l\'Utilisateur souscrit explicitement à un abonnement.',
         'Sans souscription au terme de l\'essai, le compte reste accessible en **lecture seule** : les données saisies pendant l\'essai restent consultables et exportables, mais les actions productives (nouvelles transactions, requêtes au coach IA, scanner, génération de factures) sont mises en pause.',
         'Les tarifs sont indiqués hors TVA suisse. La TVA est ajoutée si applicable selon la situation de l\'Utilisateur. Nous nous réservons le droit de modifier les tarifs avec un préavis de 30 jours notifié par email.',
