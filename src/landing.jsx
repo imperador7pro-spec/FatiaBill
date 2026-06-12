@@ -118,7 +118,7 @@ function Hero({ t, onSignUp }) {
 
           <div className={`grid grid-cols-2 sm:grid-cols-4 gap-6 mt-14 pt-8 border-t ${t.bd}`}>
             <Stat label="cantons calibrés" value="26" t={t} />
-            <Stat label="leçons suisses" value="66" t={t} />
+            <Stat label="leçons suisses" value="77" t={t} />
             <Stat label="conforme QR-bill" value="2022" t={t} />
             <Stat label="essai sans CB" value="14 j" t={t} />
           </div>
@@ -440,7 +440,7 @@ function HowItWorks({ t, onSignUp }) {
 function Overview({ t }) {
   const features = [
     { icon: Sparkles, title: 'Onboarding par canton', body: '26 cantons · permis · situation · prévoyance. Tout est calibré pour votre réalité.' },
-    { icon: GraduationCap, title: 'Académie · 66 leçons', body: 'Cantons, frontaliers, immobilier, 3A comparé, Sàrl, TVA, QR-bill, poursuites.' },
+    { icon: GraduationCap, title: 'Académie · 77 leçons', body: 'Cantons, frontaliers, immobilier, 3A comparé, Sàrl, TVA, QR-bill, poursuites.' },
     { icon: Camera, title: 'Scanner IA · Claude Vision', body: 'Photo de reçu → montant, date, TVA, fournisseur extraits. JPG / PNG / PDF.' },
     { icon: FileText, title: 'QR-factures conformes', body: 'Génération PDF avec QR-bill scannable. Conforme norme suisse depuis 2022.' },
     { icon: MapPin, title: 'Simulateur 26 cantons', body: '"Déménager à Zoug = combien d\'économies ?" Impôts + LAMal en 3 secondes.' },
@@ -651,7 +651,7 @@ function Pricing({ t, onSignUp }) {
       price: '9',
       sub: 'Pour reprendre le contrôle, sans y penser.',
       features: [
-        'Académie complète (40 leçons)',
+        'Académie complète (45 leçons)',
         'Coach IA contextuel illimité',
         'Décomposition brut → net',
         'Simulateur 26 cantons',
@@ -671,7 +671,7 @@ function Pricing({ t, onSignUp }) {
         'Tout du Privé',
         'Scanner factures IA',
         'QR-factures + envoi email',
-        'Académie Pro (26 modules)',
+        'Académie Pro (32 leçons)',
         'Recouvrement & article 725 CO',
         'Coach business IA',
       ],

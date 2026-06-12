@@ -86,6 +86,11 @@ export function AcademyView({
           </div>
         );
       })}
+      <p className={`text-[9px] leading-relaxed text-center px-4 pt-1 ${theme.mt}`}>
+        Contenu éducatif sur l'optimisation <strong>légale</strong> de vos finances en Suisse. Chiffres et barèmes donnés
+        à titre indicatif (références récentes) — ne constitue pas un conseil fiscal, juridique ou en investissement
+        personnalisé. Pour toute décision importante, consultez un·e professionnel·le agréé·e.
+      </p>
     </div>
   );
 }

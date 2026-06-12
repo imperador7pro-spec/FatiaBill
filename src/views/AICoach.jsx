@@ -109,6 +109,11 @@ export function AICoach({ theme, mode, effPlan, aiUsed, aiLimit, messages, input
           </button>
         </div>
       </div>
+      <p className={`text-[9px] leading-relaxed text-center px-2 ${theme.mt}`}>
+        Coaching éducatif sur l'optimisation <strong>légale</strong> de vos finances en Suisse. Pas un conseil fiscal,
+        juridique ou en investissement personnalisé — vérifiez toute décision importante avec un·e professionnel·le agréé·e
+        (fiduciaire, avocat·e, conseiller·ère).
+      </p>
     </div>
   );
 }
