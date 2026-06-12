@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="FatiaBill — Le copilote de vos finances">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ecfdf5"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0fdfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80,72)">
+    <rect width="56" height="56" rx="14" fill="#10b981"/>
+    <text x="28" y="40" font-family="Georgia, 'Times New Roman', serif" font-size="36" font-weight="900" font-style="italic" fill="#ffffff" text-anchor="middle">F</text>
+    <text x="74" y="38" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="900" fill="#0f172a">FatiaBill</text>
+  </g>
+  <g transform="translate(80,250)">
+    <text font-family="Arial, Helvetica, sans-serif" font-size="70" font-weight="800" fill="#0f172a">
+      <tspan x="0" y="0">Le copilote de vos finances,</tspan>
+      <tspan x="0" y="84">jamais de votre vie.</tspan>
+    </text>
+    <text x="0" y="150" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#475569">
+      Budget, fiscalité cantonale, coach IA — particuliers et indépendants en Suisse.
+    </text>
+  </g>
+  <g transform="translate(80,500)" font-family="Arial, Helvetica, sans-serif">
+    <rect width="220" height="44" rx="22" fill="#10b981"/>
+    <text x="24" y="29" font-size="18" font-weight="700" fill="#ffffff">Conçu en Suisse</text>
+    <rect x="240" width="270" height="44" rx="22" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+    <text x="264" y="29" font-size="18" font-weight="700" fill="#0f172a">14 jours gratuits · sans CB</text>
+    <text x="1040" y="29" font-size="18" font-weight="600" fill="#64748b" text-anchor="end">fatiabill.ch</text>
+  </g>
+</svg>
