@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   Target, Plus, Wallet, Edit3, Trash2, ChevronDown, BarChart3, Sparkles, Check, AlertCircle,
-  ArrowUpRight, Star, TrendingUp,
+  ArrowUpRight, Star, TrendingUp, Landmark, CalendarClock,
 } from 'lucide-react';
 import { getIcon } from '../data.js';
+import { estimateTax } from '../cantonTax.js';
 import { EmptyState } from '../components/EmptyState.jsx';
 
-export function Savings({ theme, goals, monthlyCapacity, salary, computeProjection, onOpenSalary, onAddGoal, onEditGoal, onDeleteGoal }) {
+export function Savings({ theme, goals, monthlyCapacity, salary, profile, computeProjection, onOpenSalary, onAddGoal, onEditGoal, onDeleteGoal }) {
   const [openIdx, setOpenIdx] = useState(null);
   const [productDetailKey, setProductDetailKey] = useState(null);
 
@@ -20,6 +21,7 @@ export function Savings({ theme, goals, monthlyCapacity, salary, computeProjecti
           <Plus size={16} />Objectif
         </button>
       </div>
+      <ThreeAWidget theme={theme} profile={profile} salary={salary} />
       <div className={`p-4 rounded-2xl border flex items-center justify-between ${theme.cd} ${theme.bd}`}>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Wallet size={18} /></div>
@@ -180,6 +182,119 @@ export function Savings({ theme, goals, monthlyCapacity, salary, computeProjecti
           );
         })
       )}
+    </div>
+  );
+}
+
+// 3ème pilier 3a tracker — ceiling, year-to-date contribution, estimated tax
+// saving and the 31 Dec deadline. The contributed amount is stored locally
+// (per user + year) — a server column can replace localStorage later.
+function ThreeAWidget({ theme, profile, salary }) {
+  const YEAR = new Date().getFullYear();
+  const selfEmployedNoLpp = profile?.employment_status === 'self_employed' && profile?.has_lpp === false;
+  const ceiling = selfEmployedNoLpp ? 36288 : 7258;
+
+  const lsKey = `fb_3a_${profile?.id || 'anon'}_${YEAR}`;
+  const [contributed, setContributed] = useState(() => {
+    try { return Math.min(ceiling, Math.max(0, Number(localStorage.getItem(lsKey)) || 0)); } catch { return 0; }
+  });
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(String(contributed || ''));
+
+  const save = () => {
+    const v = Math.min(ceiling, Math.max(0, Number(draft) || 0));
+    setContributed(v);
+    try { localStorage.setItem(lsKey, String(v)); } catch {}
+    setEditing(false);
+  };
+
+  const remaining = Math.max(0, ceiling - contributed);
+  const pct = Math.min(100, (contributed / ceiling) * 100);
+
+  // Estimated tax saving = drop in tax from deducting the 3a contribution.
+  const annualIncome = (salary || 0) * 12;
+  const canton = profile?.canton;
+  let savingRemaining;
+  let isEstimate = false;
+  if (annualIncome > 0 && canton) {
+    const args = { civil_status: profile?.civil_status, num_children: profile?.num_children, canton };
+    const taxNow = estimateTax({ income: annualIncome, ...args }).tax;
+    const taxAfter = estimateTax({ income: Math.max(0, annualIncome - remaining), ...args }).tax;
+    savingRemaining = Math.max(0, taxNow - taxAfter);
+  } else {
+    isEstimate = true;
+    savingRemaining = Math.round(remaining * 0.22); // generic marginal-rate fallback
+  }
+
+  const daysLeft = Math.max(0, Math.ceil((new Date(YEAR, 11, 31) - new Date()) / 86400000));
+  const done = remaining === 0;
+
+  return (
+    <div className={`rounded-2xl border overflow-hidden ${theme.cd} ${theme.bd}`}>
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500"><Landmark size={18} /></div>
+            <div>
+              <h4 className="font-black text-sm">3ᵉ pilier 3a · {YEAR}</h4>
+              <p className={`text-[10px] ${theme.mt}`}>
+                Plafond {ceiling.toLocaleString('fr-CH')} CHF{selfEmployedNoLpp ? ' (indépendant·e sans LPP)' : ''}
+              </p>
+            </div>
+          </div>
+          <button onClick={() => { setDraft(String(contributed || '')); setEditing((e) => !e); }} className={`p-1.5 rounded-lg ${theme.hv}`}>
+            <Edit3 size={13} className="text-stone-400" />
+          </button>
+        </div>
+
+        {editing && (
+          <div className={`flex items-center gap-2 mb-3 p-2 rounded-xl ${theme.sf}`}>
+            <span className={`text-[10px] font-bold ${theme.mt}`}>Déjà versé en {YEAR}</span>
+            <input
+              type="number" inputMode="decimal" autoFocus
+              value={draft} onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && save()}
+              placeholder="0"
+              className={`flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs font-bold outline-none ${theme.inp} focus:border-amber-500`}
+            />
+            <button onClick={save} className="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[10px] font-black uppercase">OK</button>
+          </div>
+        )}
+
+        <div className="mb-1 flex justify-between text-[10px] font-bold">
+          <span>{contributed.toLocaleString('fr-CH')} CHF versés</span>
+          <span className={theme.mt}>{pct.toFixed(0)}%</span>
+        </div>
+        <div className={`w-full h-2 rounded-full overflow-hidden ${theme.sf}`}>
+          <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+        </div>
+
+        <div className={`grid grid-cols-3 gap-2 mt-3 p-2.5 rounded-xl text-center ${theme.sf}`}>
+          <div>
+            <p className="text-[7px] font-black uppercase text-stone-400">Reste à verser</p>
+            <p className="font-black text-xs tabular-nums">{remaining.toLocaleString('fr-CH')}</p>
+          </div>
+          <div>
+            <p className="text-[7px] font-black uppercase text-stone-400">Impôts à gagner</p>
+            <p className="font-black text-xs tabular-nums text-emerald-500">{isEstimate ? '~' : ''}{savingRemaining.toLocaleString('fr-CH')}</p>
+          </div>
+          <div>
+            <p className="text-[7px] font-black uppercase text-stone-400">Échéance</p>
+            <p className="font-black text-xs tabular-nums">{daysLeft} j</p>
+          </div>
+        </div>
+
+        <div className={`mt-3 p-2.5 rounded-xl flex items-start gap-2 ${done
+          ? (theme.dk ? 'bg-emerald-900/15 text-emerald-300' : 'bg-emerald-50 text-emerald-800')
+          : (theme.dk ? 'bg-amber-900/15 text-amber-200' : 'bg-amber-50 text-amber-800')}`}>
+          {done ? <Check size={14} className="mt-0.5 shrink-0" /> : <CalendarClock size={14} className="mt-0.5 shrink-0" />}
+          <p className="text-[10px] leading-relaxed">
+            {done
+              ? `Plafond ${YEAR} atteint. Versement maximisé — rien à ajouter cette année.`
+              : `Versez les ${remaining.toLocaleString('fr-CH')} CHF restants avant le 31 décembre pour ${isEstimate ? 'récupérer environ' : 'récupérer'} ${savingRemaining.toLocaleString('fr-CH')} CHF d'impôts${isEstimate ? '. Renseignez salaire + canton pour le chiffre exact.' : ' cette année.'}`}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

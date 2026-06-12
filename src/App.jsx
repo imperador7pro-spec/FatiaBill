@@ -469,6 +469,23 @@ export default function App() {
     if (user) db.deleteTransaction(id);
   };
 
+  // Record a generated invoice as a pending receivable so it surfaces in the
+  // Transactions "créances à relancer" flow with aging + relance steps.
+  const trackInvoiceAsReceivable = ({ amount, label, date }) => {
+    const tx = {
+      id: db.newId(),
+      type: 'IN',
+      amount: Number(amount) || 0,
+      label,
+      date: date || new Date().toISOString().split('T')[0],
+      status: 'PENDING',
+      cat: null,
+    };
+    setTransactions((prev) => [tx, ...prev]);
+    if (user) db.upsertTransaction(tx, user.id);
+    toast.success('Facture suivie comme créance');
+  };
+
   const openAddGoal = () => {
     if (goals.length >= getLimit(effPlan, 'goals')) {
       setModal('upgrade');
@@ -718,6 +735,7 @@ export default function App() {
             goals={goals}
             monthlyCapacity={finance.monthlyCapacity}
             salary={salary}
+            profile={profile}
             computeProjection={goalProjection}
             onOpenSalary={() => setModal('sal')}
             onAddGoal={openAddGoal}
@@ -773,6 +791,7 @@ export default function App() {
             effPlan={effPlan}
             isPremium={isPremium}
             onUpgrade={() => setModal('upgrade')}
+            onTrackReceivable={trackInvoiceAsReceivable}
           />
         )}
 
